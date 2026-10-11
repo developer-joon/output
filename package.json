@@ -21,7 +21,7 @@
     "dist": "electron-builder --mac --dir",
     "dist:dmg": "APPLE_KEYCHAIN_PROFILE=output electron-builder --mac dmg --universal",
     "dist:dmg:local": "electron-builder --mac dmg --universal -c.mac.identity=- -c.mac.hardenedRuntime=false -c.mac.notarize=false",
-    "release": "APPLE_KEYCHAIN_PROFILE=output GH_TOKEN=$(gh auth token) electron-builder --mac dmg zip --universal --publish always"
+    "release": "sh tools/release.sh"
   },
   "engines": {
     "node": ">=24.0.0"

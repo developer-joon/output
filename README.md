@@ -28,7 +28,7 @@ npm test                 # 테스트 (장치·Electron 없이 돈다)
 npm run app              # 개발 실행
 npm run dist:dmg:local   # DMG — 임시(ad-hoc) 서명, 공증 없음. 인증서가 없어도 된다
 npm run dist:dmg         # DMG — Developer ID 서명 + 공증 (키체인의 인증서와 notarytool 프로필 `output` 필요)
-npm run release          # 서명·공증한 DMG·zip을 GitHub Releases에 올림 (package.json 버전을 먼저 올린다, gh 로그인 필요)
+npm run release          # 서명·공증한 DMG·zip을 GitHub Releases에 올림 (버전을 올리고 커밋·푸시한 뒤, gh 로그인 필요)
 ```
 
 임시 서명 빌드는 다른 Mac에서 처음 열 때 "확인되지 않은 개발자" 경고가 뜹니다 (Finder에서 우클릭 → 열기). 다시 빌드하면 서명이 바뀌어 입력 모니터링·손쉬운 사용 권한을 다시 줘야 할 수 있습니다.
