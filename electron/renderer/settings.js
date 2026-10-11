@@ -38,7 +38,7 @@ cb.on('cb:view', (v) => {
   const key = `${v.health?.device?.state}|${v.deviceLayerKo ?? ''}|${v.health?.orca?.ok}|${v.warnings.map((w) => w.code).join(',')}|${v.update?.state}|${v.update?.version ?? ''}`;
   if (key !== lastDeviceKey) {
     lastDeviceKey = key;
-    if (tab === 'about' && !dv.busy) renderAbout();
+    if (tab === 'about' && !dv.busy && !ck.busy) renderAbout();
   }
 });
 
@@ -243,6 +243,38 @@ function updateLine(u) {
   return h('span', { class: 'muted small' }, '최신 버전 · 6시간마다 확인');
 }
 
+// 점검하기 (2026-10-12): 어디가 막혔는지 한 번에. LED 테스트는 키를 하나씩 하얗게 켠다 (장치 설정은 바꾸지 않음)
+const ck = { busy: false, result: null, copied: false };
+
+const CHECK_ACTION = {
+  'open-input-monitoring': ['입력 모니터링 열기', () => cb.invoke('cb:openPermission', 'inputMonitoring')],
+  'open-accessibility': ['손쉬운 사용 열기', () => cb.invoke('cb:openPermission', 'accessibility')],
+  'device-prep': ['장치 준비로', () => document.querySelector('[data-step="4"]')?.scrollIntoView({ behavior: 'smooth' })],
+};
+
+function checkSection() {
+  const run = h('button', { class: 'btn primary', disabled: ck.busy, onclick: async () => {
+    if (ck.busy) return;
+    ck.busy = true; ck.copied = false; renderAbout();
+    try { ck.result = await cb.invoke('cb:check:run'); } finally { ck.busy = false; renderAbout(); }
+  } }, ck.busy ? '점검 중… 키가 하나씩 하얗게 켜집니다' : ck.result ? '다시 점검하기' : '점검하기');
+  const copy = ck.result ? h('button', { class: 'btn', onclick: async () => {
+    try { await navigator.clipboard.writeText(ck.result.text); ck.copied = true; } catch { ck.copied = false; }
+    renderAbout();
+  } }, ck.copied ? '복사됨' : '결과 복사') : null;
+  const rows = ck.result ? h('div', { class: 'steps' }, ck.result.items.map((i) => {
+    const act = i.action && CHECK_ACTION[i.action];
+    return h('div', { class: `step ${i.ok === true ? 'done' : i.ok === false ? 'todo' : ''}`, dataset: { check: i.id } },
+      h('span', { class: 'num' }, i.ok === true ? '✓' : i.ok === false ? '!' : '–'),
+      h('div', { class: 'grow' }, h('h3', {}, i.titleKo), h('p', {}, i.detailKo), i.fixKo ? h('p', { class: 'muted' }, `→ ${i.fixKo}`) : null,
+        act ? h('div', { class: 'btns' }, h('button', { class: 'btn', onclick: act[1] }, act[0])) : null));
+  })) : null;
+  return h('div', { class: 'check-section' },
+    h('h3', {}, '점검'),
+    h('p', { class: 'small muted' }, '권한 · 장치 연결 · 장치 설정 · LED · Orca · 지금 레이어를 차례로 봅니다. 결과 복사에는 작업 이름·경로가 들어가지 않습니다.'),
+    h('div', { class: 'row-flex' }, run, copy), rows);
+}
+
 async function renderAbout() {
   const info = await cb.invoke('cb:info');
   const logs = await cb.invoke('cb:logs');
@@ -251,6 +283,7 @@ async function renderAbout() {
   const setup = await setupSection();
   mount(main, panel('앱 정보', [
     '버전: 새 버전이 나오면 자동으로 받아 두고 알려 줍니다. 다시 시작해서 업데이트를 누를 때 바뀝니다.',
+    '점검하기: 어디가 막혔는지 한 번에 봅니다. LED 테스트는 키 1~13과 언더글로우를 하나씩 하얗게 켭니다 (장치 설정은 바꾸지 않음). 결과 복사로 붙여 보내 주세요.',
     '설치 단계: 각 단계가 지금 상태를 보여 줍니다. 표시된 단계만 하면 됩니다. 장치 준비는 준비가 안 됐을 때만 버튼이 나옵니다 (새 장치, 펌웨어 업데이트 뒤). 펌웨어 업데이트만 Input 앱으로 하세요.',
     '진단 내보내기: 문제를 알릴 때 이 파일을 붙여 주세요. 작업 이름·경로·대화 내용은 들어가지 않습니다.',
     '상태 폴더 열기: 설정·백업·로그가 있는 폴더를 엽니다.',
@@ -262,6 +295,7 @@ async function renderAbout() {
         h('button', { class: 'btn', onclick: () => cb.invoke('cb:openStateDir') }, '상태 폴더 열기'),
         h('button', { class: 'btn', onclick: async () => { const r = await cb.invoke('cb:diagnostics:export'); note.textContent = r.messageKo; } }, '진단 내보내기'),
         note)),
+    checkSection(),
     setup,
     h('h3', {}, '최근 기록'),
     h('div', { class: 'logs' }, logs.length ? logs.slice().reverse().map((l) => h('div', {}, `${new Date(l.at).toLocaleTimeString('ko-KR')}  ${l.messageKo}`)) : h('div', { class: 'muted' }, '기록 없음'))));

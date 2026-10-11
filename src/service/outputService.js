@@ -31,6 +31,7 @@ import { Usage } from './usage.js';
 import { LayerPickerMethods } from './layerPicker.js';
 import { LayerStoreMethods } from './layerStore.js';
 import { DeviceSetupMethods } from './deviceSetup.js';
+import { SelfCheckMethods } from './selfCheck.js';
 
 /**
  * 앱의 몸통 — doctor --live --orca 를 상주 서비스로 만든 것 (M5 설계 §4).
@@ -357,6 +358,8 @@ export class OutputService extends EventEmitter {
 
   _send(payload) {
     if (!this.transport) return Promise.resolve({ ok: 1, offline: true });
+    // 점검의 LED 테스트 중에는 평소 그리기를 보내지 않는다 — 끝나면 처음부터 다시 그린다 (selfCheck.js)
+    if (this._ledTesting) return Promise.resolve({ ok: 1, skipped: true });
     // LED는 1.2초만 기다린다 (2026-10-11 실기: 블루투스에서 응답 하나가 빠지면 장치 명령이 한 줄로 서 있어
     // 다음 LED가 5초 늦었다). 정상 응답은 블루투스에서도 0.6초 안팎
     return this.transport.call(LED_METHOD, payload, LED_TIMEOUT_MS).catch((err) => {
@@ -770,7 +773,7 @@ export class OutputService extends EventEmitter {
 }
 
 // 나눈 메서드 묶음을 붙인다 (2026-10-10). 동작은 그대로 — 파일만 나눴다
-for (const part of [KeyRepeatMethods, LayerStoreMethods, DeviceSetupMethods, HudPrefsMethods, LayerPickerMethods]) {
+for (const part of [KeyRepeatMethods, LayerStoreMethods, DeviceSetupMethods, HudPrefsMethods, LayerPickerMethods, SelfCheckMethods]) {
   for (const name of Object.getOwnPropertyNames(part.prototype)) {
     if (name !== 'constructor') Object.defineProperty(OutputService.prototype, name, Object.getOwnPropertyDescriptor(part.prototype, name));
   }

@@ -174,6 +174,12 @@ export async function smoke(c) {
     await js(`document.querySelector('[data-step="4"]')?.scrollIntoView()`);
     await wait(200);
     await snap(c.settings, 'device-plan');
+    // 점검하기 (2026-10-12): LED 테스트까지 돌고 결과 칸이 그려지는지
+    await js(`[...document.querySelectorAll('button')].find(b => b.textContent === '점검하기')?.click()`);
+    for (let i = 0; i < 40 && !(await js(`document.querySelectorAll('[data-check]').length`)); i++) await wait(500);
+    await js(`document.querySelector('.check-section')?.scrollIntoView()`);
+    await wait(200);
+    await snap(c.settings, 'check');
     // 프리셋: 노브 그림이 함께 보인다
     await js(`document.querySelector('[data-nav="presets"]').click()`);
     await wait(500);

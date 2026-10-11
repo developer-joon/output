@@ -372,6 +372,11 @@ function registerIpc() {
   });
   handle('cb:logs', () => service.logs.slice(-100));
   handle('cb:info', () => ({ versions: service.versions, stateDir: STATE_DIR }));
+  // 점검하기 (2026-10-12): 권한·장치·LED 테스트·Orca·레이어·환경. 작업 이름·경로는 넣지 않는다
+  handle('cb:check:run', () => service.selfCheck({
+    accessibility: service.accessibilityTrusted(), arch: process.arch, osKo: `macOS ${process.getSystemVersion()}`,
+    appVersion: app.getVersion(), orcaBin: service.orcaBin,
+  }));
   handle('cb:quit', () => { app.quit(); });
   handle('cb:update:install', () => updater?.install() ?? false);
   handle('cb:openStateDir', () => shell.openPath(STATE_DIR));
