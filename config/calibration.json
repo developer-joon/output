@@ -1,0 +1,181 @@
+{
+  "version": 1,
+  "calibratedAt": "2026-09-27T01:59:03.141Z",
+  "device": {
+    "vid": "0x303a",
+    "pid": "0x8298",
+    "firmware": "0.6.2"
+  },
+  "sourcesKo": [
+    "실기 8차 (2026-09-21) 입력 관측",
+    "실기 9차 (2026-09-21) 입력 관측",
+    "실기 17차 (2026-09-27) 새 Output 레이어(AG06~12) 입력 관측",
+    "실기 16차 (2026-09-26) LED 매핑 · 가상 스레드 언더글로우",
+    "최신 관측 채택: key-3-1 ACT06 → AG06",
+    "최신 관측 채택: key-3-2 ACT07 → AG07",
+    "최신 관측 채택: key-3-3 ACT08 → AG08",
+    "최신 관측 채택: key-3-4 ACT09 → AG09",
+    "최신 관측 채택: key-4-1 ACT10 → AG10",
+    "최신 관측 채택: key-4-2 ACT11 → AG11",
+    "최신 관측 채택: key-4-3 ACT12 → AG12"
+  ],
+  "keyEvent": {
+    "event": "v.oai.hid",
+    "keyField": "p.k",
+    "actField": "p.act",
+    "press": 1,
+    "release": 0
+  },
+  "logicalToKeycode": {
+    "slot1": "KV_OAI_AG00",
+    "slot2": "KV_OAI_AG01",
+    "slot3": "KV_OAI_AG02",
+    "slot4": "KV_OAI_AG03",
+    "slot5": "KV_OAI_AG04",
+    "slot6": "KV_OAI_AG05",
+    "slot7": "KV_OAI_AG06",
+    "slot8": "KV_OAI_AG07",
+    "slot9": "KV_OAI_AG08",
+    "slot10": "KV_OAI_AG09",
+    "attention": "KV_OAI_AG10",
+    "ack": "KV_OAI_AG11",
+    "mode_back": "KV_OAI_AG12",
+    "dial_cw": "KV_OAI_ENC_CC",
+    "dial_ccw": "KV_OAI_ENC_CW",
+    "dial_click": "KV_OAI_ENC_CLK"
+  },
+  "eventKeyToLogical": {
+    "AG00": "slot1",
+    "AG01": "slot2",
+    "AG02": "slot3",
+    "AG03": "slot4",
+    "AG04": "slot5",
+    "AG05": "slot6",
+    "AG06": "slot7",
+    "AG07": "slot8",
+    "AG08": "slot9",
+    "AG09": "slot10",
+    "AG10": "attention",
+    "AG11": "ack",
+    "AG12": "mode_back"
+  },
+  "dial": {
+    "event": "v.oai.hid",
+    "rotateAct": 2,
+    "pressAct": 1,
+    "releaseAct": 0,
+    "codeNamingInverted": true,
+    "cw": "KV_OAI_ENC_CC",
+    "ccw": "KV_OAI_ENC_CW",
+    "click": "KV_OAI_ENC_CLK",
+    "clickSupported": true
+  },
+  "joystick": {
+    "mode": "VENDOR",
+    "event": "v.oai.rad",
+    "angleField": "p.a",
+    "distanceField": "p.d",
+    "deadzone": 0.05,
+    "neutralDistance": 0,
+    "sectors": [
+      {
+        "direction": "right",
+        "center": 0.0173,
+        "from": 0.8821,
+        "to": 0.1351
+      },
+      {
+        "direction": "down",
+        "center": 0.2529,
+        "from": 0.1351,
+        "to": 0.366
+      },
+      {
+        "direction": "left",
+        "center": 0.4791,
+        "from": 0.366,
+        "to": 0.613
+      },
+      {
+        "direction": "up",
+        "center": 0.7469,
+        "from": 0.613,
+        "to": 0.8821
+      }
+    ]
+  },
+  "led": {
+    "method": "v.oai.thstatus",
+    "addressing": "array_position",
+    "keyCount": 13,
+    "payloadParams": {
+      "b": 1,
+      "e": 1,
+      "s": 0.5,
+      "sk": 0,
+      "sa": 0
+    },
+    "controllableIndices": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "indexToLogical": {
+      "0": "slot1",
+      "1": "slot2",
+      "2": "slot3",
+      "3": "slot4",
+      "4": "slot5",
+      "5": "slot6",
+      "6": "slot7",
+      "7": "slot8",
+      "8": "slot9",
+      "9": "slot10",
+      "10": "attention",
+      "11": "ack",
+      "12": "mode_back"
+    },
+    "notControllableIndices": [],
+    "clearMethod": null,
+    "baseColorSource": "layer.color",
+    "ambient": {
+      "method": "virtual_thread",
+      "id": 13,
+      "flag": "sa",
+      "brightnessParam": "b"
+    }
+  },
+  "contractDeviations": [
+    {
+      "logical": "slot1",
+      "contract": "AG01",
+      "measured": "AG00",
+      "reasonKo": "계약은 AG01로 권장하지만 실측 이벤트는 AG00입니다."
+    },
+    {
+      "logical": "slot2",
+      "contract": "AG00",
+      "measured": "AG01",
+      "reasonKo": "계약은 AG00로 권장하지만 실측 이벤트는 AG01입니다."
+    },
+    {
+      "logical": "dial_cw",
+      "contract": "AG13",
+      "measured": "KV_OAI_ENC_CC",
+      "reasonKo": "회전 코드 이름이 실제 방향과 반대입니다. 이름을 믿으면 방향이 뒤집힙니다."
+    }
+  ],
+  "unverified": [
+    "키별 지정을 해제해 기본색으로 되돌리는 수단"
+  ]
+}

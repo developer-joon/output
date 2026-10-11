@@ -1,0 +1,64 @@
+{
+  "version": 2,
+  "hardwareContract": {
+    "row0": [
+      "dial",
+      "slot1",
+      "slot2",
+      "joystick"
+    ],
+    "row1": [
+      "slot3",
+      "slot4",
+      "slot5",
+      "slot6"
+    ],
+    "row2": [
+      "A1",
+      "A2",
+      "A3",
+      "A4"
+    ],
+    "row3": [
+      "mini_led_x3",
+      "attention",
+      "ack",
+      "mode_back"
+    ]
+  },
+  "logicalToAgentKey": {
+    "slot1": "AG01",
+    "slot2": "AG00",
+    "slot3": "AG02",
+    "slot4": "AG03",
+    "slot5": "AG04",
+    "slot6": "AG05",
+    "A1": "AG06",
+    "A2": "AG07",
+    "A3": "AG08",
+    "A4": "AG09",
+    "attention": "AG10",
+    "ack": "AG11",
+    "mode_back": "AG12",
+    "dial_cw": "AG13",
+    "dial_ccw": "AG14",
+    "joystick_up": "AG15",
+    "joystick_left": "AG16",
+    "joystick_down": "AG17",
+    "joystick_right": "AG18"
+  },
+  "slotPolicy": {
+    "visiblePerBank": 6,
+    "stableAssignment": true,
+    "neverReorderOccupiedSlots": true,
+    "releaseDoneOnlyAfterAck": true
+  },
+  "bottomKeys": {
+    "attention": "focus_next_attention",
+    "ack": "acknowledge_notification_only",
+    "mode_back": "toggle_global_detail_or_back"
+  },
+  "miniLeds": {
+    "purpose": "hardware_layer_indicator_only"
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "_note": "실기 1차 관측(2026-09-20) 재현: 활성 레이어 Orca, AG 바인딩 0개. 키코드 내용은 미확인이라 placeholder.",
+  "info": {
+    "product": "Creator Micro 2",
+    "vendorId": 12346,
+    "productId": 33432
+  },
+  "version": {
+    "version": "0.6.2"
+  },
+  "status": {
+    "version": "0.6.2",
+    "profile_index": 0,
+    "layer_index": 1,
+    "battery": 99,
+    "is_charging": true
+  },
+  "keymap": {
+    "activeProfileId": null,
+    "profiles": [
+      {
+        "id": "default",
+        "layers": [
+          {
+            "name": "Orca",
+            "layout": {
+              "keymap": [
+                [
+                  "KC_F13",
+                  "KC_F14"
+                ],
+                [
+                  "KC_F15",
+                  "KC_F16",
+                  "KC_F17",
+                  "KC_F18"
+                ],
+                [
+                  "KC_F19",
+                  "KC_F20",
+                  "KC_F21",
+                  "KC_F22"
+                ],
+                [
+                  "KC_F23",
+                  "KC_F24",
+                  "KC_ESC"
+                ]
+              ]
+            }
+          },
+          {
+            "name": "Media",
+            "layout": {
+              "keymap": [
+                [
+                  "KC_MPLY",
+                  "KC_MNXT"
+                ],
+                [
+                  "KC_VOLU",
+                  "KC_VOLD",
+                  "KC_MUTE",
+                  "KC_MPRV"
+                ],
+                [
+                  "KC_A",
+                  "KC_B",
+                  "KC_C",
+                  "KC_D"
+                ],
+                [
+                  "KC_E",
+                  "KC_F",
+                  "KC_G"
+                ]
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

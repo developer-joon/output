@@ -1,0 +1,338 @@
+{
+  "worktrees": [
+    {
+      "worktreeId": "8eca8a57-da8e-426b-bf40-373fd9810a8f::<path>",
+      "displayName": "output",
+      "branch": "",
+      "workspaceStatus": "in-progress",
+      "status": "working",
+      "unread": false,
+      "isArchived": false,
+      "isPinned": false,
+      "sortOrder": 1790168588335,
+      "liveTerminalCount": 2,
+      "agents": [
+        {
+          "paneKey": "715d2924-2062-4d70-ae60-624f8ea3c466:b02bb84c-3eb7-4fc0-bdde-36dfff73adc1",
+          "parentPaneKey": null,
+          "state": "working",
+          "agentType": "claude",
+          "taskTitle": null,
+          "displayName": null,
+          "toolName": "Bash",
+          "interrupted": false,
+          "stateStartedAt": 1790168522419,
+          "updatedAt": 1790168653577
+        }
+      ]
+    },
+    {
+      "worktreeId": "4104478c-3942-4d09-aeb6-c05b76bd4cc8::<path>",
+      "displayName": "sample-app",
+      "branch": "refs/heads/sample-app",
+      "workspaceStatus": "in-progress",
+      "status": "active",
+      "unread": false,
+      "isArchived": false,
+      "isPinned": false,
+      "sortOrder": 1790168589335,
+      "liveTerminalCount": 1,
+      "agents": [
+        {
+          "paneKey": "9ea59de0-e18e-466c-ba86-90a72f487b88:da29e82d-183b-41d7-8a32-06548e9c60aa",
+          "parentPaneKey": null,
+          "state": "done",
+          "agentType": "codex",
+          "taskTitle": null,
+          "displayName": null,
+          "toolName": null,
+          "interrupted": false,
+          "stateStartedAt": 1790168076033,
+          "updatedAt": 1790168076033
+        }
+      ]
+    },
+    {
+      "worktreeId": "ae8ab236-19c7-41e0-9a4c-72c59ddbf069::<path>",
+      "displayName": "Sample feature",
+      "branch": "refs/heads/sample-feature",
+      "workspaceStatus": "in-progress",
+      "status": "active",
+      "unread": false,
+      "isArchived": false,
+      "isPinned": false,
+      "sortOrder": 1790168587335,
+      "liveTerminalCount": 1,
+      "agents": [
+        {
+          "paneKey": "b0e9d5ae-f163-4b85-9174-c7a398c932e1:a68d9bbe-fe92-4758-8bf2-5a7211f27223",
+          "parentPaneKey": null,
+          "state": "done",
+          "agentType": "claude",
+          "taskTitle": null,
+          "displayName": null,
+          "toolName": null,
+          "interrupted": false,
+          "stateStartedAt": 1790168585196,
+          "updatedAt": 1790168585196
+        }
+      ]
+    },
+    {
+      "worktreeId": "4104478c-3942-4d09-aeb6-c05b76bd4cc8::<path>",
+      "displayName": "master",
+      "branch": "refs/heads/master",
+      "workspaceStatus": "in-progress",
+      "status": "inactive",
+      "unread": false,
+      "isArchived": false,
+      "isPinned": false,
+      "sortOrder": 1790168585335,
+      "liveTerminalCount": 0,
+      "agents": []
+    },
+    {
+      "worktreeId": "ae8ab236-19c7-41e0-9a4c-72c59ddbf069::<path>",
+      "displayName": "master",
+      "branch": "refs/heads/master",
+      "workspaceStatus": "in-progress",
+      "status": "inactive",
+      "unread": false,
+      "isArchived": false,
+      "isPinned": false,
+      "sortOrder": 1790168586335,
+      "liveTerminalCount": 0,
+      "agents": []
+    }
+  ],
+  "terminals": [
+    {
+      "handle": "term_ecffe082-f3d9-44fd-8c25-fe9a61886fbb",
+      "worktreeId": "8eca8a57-da8e-426b-bf40-373fd9810a8f::<path>",
+      "tabId": "79c7ab20-0835-4a59-9bbf-209827462348",
+      "leafId": "de543c61-8ffb-44a0-a389-0acad52b5a3e",
+      "title": "Terminal 1",
+      "connected": true,
+      "writable": true,
+      "orphaned": false,
+      "lastOutputAt": null,
+      "agentIdentity": null
+    },
+    {
+      "handle": "term_d160f76a-eee9-4a8e-95c7-b9b5ae9a89db",
+      "worktreeId": "8eca8a57-da8e-426b-bf40-373fd9810a8f::<path>",
+      "tabId": "715d2924-2062-4d70-ae60-624f8ea3c466",
+      "leafId": "b02bb84c-3eb7-4fc0-bdde-36dfff73adc1",
+      "title": "◐ M1 Mock Core 구현 및 자동 테스트",
+      "connected": true,
+      "writable": true,
+      "orphaned": false,
+      "lastOutputAt": 1790168653847,
+      "agentIdentity": "claude"
+    },
+    {
+      "handle": "term_981166b9-cae6-4318-8b49-09e04e152b59",
+      "worktreeId": "4104478c-3942-4d09-aeb6-c05b76bd4cc8::<path>",
+      "tabId": "9ea59de0-e18e-466c-ba86-90a72f487b88",
+      "leafId": "da29e82d-183b-41d7-8a32-06548e9c60aa",
+      "title": "샘플 작업 | sample-app",
+      "connected": true,
+      "writable": true,
+      "orphaned": false,
+      "lastOutputAt": 1790168653800,
+      "agentIdentity": "codex"
+    },
+    {
+      "handle": "term_11ee5e36-c7cf-48c3-b94f-6cf35b3d26d1",
+      "worktreeId": "ae8ab236-19c7-41e0-9a4c-72c59ddbf069::<path>",
+      "tabId": "b0e9d5ae-f163-4b85-9174-c7a398c932e1",
+      "leafId": "a68d9bbe-fe92-4758-8bf2-5a7211f27223",
+      "title": "✳ Claude Code",
+      "connected": true,
+      "writable": true,
+      "orphaned": false,
+      "lastOutputAt": 1790168595242,
+      "agentIdentity": "claude"
+    },
+    {
+      "handle": "term_04847ed1-bf8c-40aa-9f32-4118bae54b74",
+      "worktreeId": "17ebaeda-2929-461b-8733-723fa8f57e4c::<path>",
+      "tabId": "pty:17ebaeda-2929-461b-8733-723fa8f57e4c::<path>",
+      "leafId": "pty:17ebaeda-2929-461b-8733-723fa8f57e4c::<path>",
+      "title": null,
+      "connected": true,
+      "writable": true,
+      "orphaned": true,
+      "lastOutputAt": null,
+      "agentIdentity": null
+    },
+    {
+      "handle": "term_3a70ed4b-1f8d-4076-b20c-66b628686dd3",
+      "worktreeId": "17ebaeda-2929-461b-8733-723fa8f57e4c::<path>",
+      "tabId": "pty:17ebaeda-2929-461b-8733-723fa8f57e4c::<path>",
+      "leafId": "pty:17ebaeda-2929-461b-8733-723fa8f57e4c::<path>",
+      "title": null,
+      "connected": true,
+      "writable": true,
+      "orphaned": true,
+      "lastOutputAt": null,
+      "agentIdentity": null
+    },
+    {
+      "handle": "term_a71f0b4d-10f7-4685-ac00-8a2f230f92cc",
+      "worktreeId": "f0f439f1-1e56-411a-8d96-045fc5321fb1::<path>",
+      "tabId": "pty:f0f439f1-1e56-411a-8d96-045fc5321fb1::<path>",
+      "leafId": "pty:f0f439f1-1e56-411a-8d96-045fc5321fb1::<path>",
+      "title": null,
+      "connected": true,
+      "writable": true,
+      "orphaned": true,
+      "lastOutputAt": null,
+      "agentIdentity": null
+    },
+    {
+      "handle": "term_d57c3139-0b21-4e9c-9657-10affe380a7d",
+      "worktreeId": "c8f12362-9fcf-4c2d-846c-5bbdf0f7d97c::<path>",
+      "tabId": "pty:c8f12362-9fcf-4c2d-846c-5bbdf0f7d97c::<path>",
+      "leafId": "pty:c8f12362-9fcf-4c2d-846c-5bbdf0f7d97c::<path>",
+      "title": null,
+      "connected": true,
+      "writable": true,
+      "orphaned": true,
+      "lastOutputAt": null,
+      "agentIdentity": null
+    },
+    {
+      "handle": "term_794cd95e-6338-4598-aa3c-e17316beb7f8",
+      "worktreeId": "c8f12362-9fcf-4c2d-846c-5bbdf0f7d97c::<path>",
+      "tabId": "pty:c8f12362-9fcf-4c2d-846c-5bbdf0f7d97c::<path>",
+      "leafId": "pty:c8f12362-9fcf-4c2d-846c-5bbdf0f7d97c::<path>",
+      "title": null,
+      "connected": true,
+      "writable": true,
+      "orphaned": true,
+      "lastOutputAt": null,
+      "agentIdentity": null
+    },
+    {
+      "handle": "term_8726e99f-ad0c-4f20-a07a-0390c9f892d5",
+      "worktreeId": "17ebaeda-2929-461b-8733-723fa8f57e4c::<path>",
+      "tabId": "pty:17ebaeda-2929-461b-8733-723fa8f57e4c::<path>",
+      "leafId": "pty:17ebaeda-2929-461b-8733-723fa8f57e4c::<path>",
+      "title": null,
+      "connected": true,
+      "writable": true,
+      "orphaned": true,
+      "lastOutputAt": null,
+      "agentIdentity": null
+    },
+    {
+      "handle": "term_0158a107-6c9e-4c4e-8292-99f27e2d2fa6",
+      "worktreeId": "17ebaeda-2929-461b-8733-723fa8f57e4c::<path>",
+      "tabId": "pty:17ebaeda-2929-461b-8733-723fa8f57e4c::<path>",
+      "leafId": "pty:17ebaeda-2929-461b-8733-723fa8f57e4c::<path>",
+      "title": null,
+      "connected": true,
+      "writable": true,
+      "orphaned": true,
+      "lastOutputAt": null,
+      "agentIdentity": null
+    },
+    {
+      "handle": "term_c4c64f84-d1ab-414c-a486-b7d1158ef9c5",
+      "worktreeId": "17ebaeda-2929-461b-8733-723fa8f57e4c::<path>",
+      "tabId": "pty:17ebaeda-2929-461b-8733-723fa8f57e4c::<path>",
+      "leafId": "pty:17ebaeda-2929-461b-8733-723fa8f57e4c::<path>",
+      "title": null,
+      "connected": true,
+      "writable": true,
+      "orphaned": true,
+      "lastOutputAt": null,
+      "agentIdentity": null
+    },
+    {
+      "handle": "term_6086ea26-4309-499b-b451-77b312497e2c",
+      "worktreeId": "17ebaeda-2929-461b-8733-723fa8f57e4c::<path>",
+      "tabId": "pty:17ebaeda-2929-461b-8733-723fa8f57e4c::<path>",
+      "leafId": "pty:17ebaeda-2929-461b-8733-723fa8f57e4c::<path>",
+      "title": null,
+      "connected": true,
+      "writable": true,
+      "orphaned": true,
+      "lastOutputAt": null,
+      "agentIdentity": null
+    },
+    {
+      "handle": "term_aee3530b-1be8-4fa6-a4ea-f41bdd068e30",
+      "worktreeId": "17ebaeda-2929-461b-8733-723fa8f57e4c::<path>",
+      "tabId": "pty:17ebaeda-2929-461b-8733-723fa8f57e4c::<path>",
+      "leafId": "pty:17ebaeda-2929-461b-8733-723fa8f57e4c::<path>",
+      "title": null,
+      "connected": true,
+      "writable": true,
+      "orphaned": true,
+      "lastOutputAt": null,
+      "agentIdentity": null
+    },
+    {
+      "handle": "term_ff111785-ea92-4840-b332-42c74d51d220",
+      "worktreeId": "17ebaeda-2929-461b-8733-723fa8f57e4c::<path>",
+      "tabId": "pty:17ebaeda-2929-461b-8733-723fa8f57e4c::<path>",
+      "leafId": "pty:17ebaeda-2929-461b-8733-723fa8f57e4c::<path>",
+      "title": null,
+      "connected": true,
+      "writable": true,
+      "orphaned": true,
+      "lastOutputAt": null,
+      "agentIdentity": null
+    },
+    {
+      "handle": "term_fad42183-3a1c-46c5-a7f6-f435c0c30ade",
+      "worktreeId": "f0f439f1-1e56-411a-8d96-045fc5321fb1::<path>",
+      "tabId": "pty:f0f439f1-1e56-411a-8d96-045fc5321fb1::<path>",
+      "leafId": "pty:f0f439f1-1e56-411a-8d96-045fc5321fb1::<path>",
+      "title": null,
+      "connected": true,
+      "writable": true,
+      "orphaned": true,
+      "lastOutputAt": null,
+      "agentIdentity": null
+    },
+    {
+      "handle": "term_b9571b87-e43c-4d40-8e76-c66bf33434f1",
+      "worktreeId": "c8f12362-9fcf-4c2d-846c-5bbdf0f7d97c::<path>",
+      "tabId": "pty:c8f12362-9fcf-4c2d-846c-5bbdf0f7d97c::<path>",
+      "leafId": "pty:c8f12362-9fcf-4c2d-846c-5bbdf0f7d97c::<path>",
+      "title": null,
+      "connected": true,
+      "writable": true,
+      "orphaned": true,
+      "lastOutputAt": null,
+      "agentIdentity": null
+    },
+    {
+      "handle": "term_1835bce9-201b-4a42-ac27-cea5d04dfebf",
+      "worktreeId": "17ebaeda-2929-461b-8733-723fa8f57e4c::<path>",
+      "tabId": "pty:17ebaeda-2929-461b-8733-723fa8f57e4c::<path>",
+      "leafId": "pty:17ebaeda-2929-461b-8733-723fa8f57e4c::<path>",
+      "title": null,
+      "connected": true,
+      "writable": true,
+      "orphaned": true,
+      "lastOutputAt": null,
+      "agentIdentity": null
+    },
+    {
+      "handle": "term_3dd71476-bbb9-4911-81bc-d7912636c9cd",
+      "worktreeId": "f0f439f1-1e56-411a-8d96-045fc5321fb1::<path>",
+      "tabId": "pty:f0f439f1-1e56-411a-8d96-045fc5321fb1::<path>",
+      "leafId": "pty:f0f439f1-1e56-411a-8d96-045fc5321fb1::<path>",
+      "title": null,
+      "connected": true,
+      "writable": true,
+      "orphaned": true,
+      "lastOutputAt": null,
+      "agentIdentity": null
+    }
+  ]
+}

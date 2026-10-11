@@ -1,0 +1,10 @@
+{
+  "name": "cm2-ag00-setup",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Creator Micro 2 AG00 keymap and LED diagnostic tools",
+  "dependencies": {
+    "node-hid": "^3.2.0"
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "name": "output",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Output — AI 에이전트 작업 상태를 키보드 LED로 보여주고, 한 번 눌러 그곳으로",
+  "license": "Apache-2.0",
+  "author": "joonwoo.kim <developer.joon@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/developer-joon/output.git"
+  },
+  "scripts": {
+    "test": "node --test 'test/**/*.test.js'",
+    "test:watch": "node --test --watch 'test/**/*.test.js'",
+    "demo": "node demo/e2e.js",
+    "doctor": "node tools/doctor.mjs",
+    "calibrate": "node tools/calibrate.mjs",
+    "app": "electron .",
+    "app:smoke": "electron . --smoke",
+    "dist": "electron-builder --mac --dir",
+    "dist:dmg": "APPLE_KEYCHAIN_PROFILE=output electron-builder --mac dmg --universal",
+    "dist:dmg:local": "electron-builder --mac dmg --universal -c.mac.identity=- -c.mac.hardenedRuntime=false -c.mac.notarize=false"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "optionalDependencies": {
+    "keysynth": "file:native/keysynth",
+    "node-hid": "^3.1.2"
+  },
+  "devDependencies": {
+    "electron": "^44.4.5",
+    "electron-builder": "^26.15.3"
+  },
+  "main": "electron/main.mjs",
+  "productName": "Output",
+  "build": {
+    "appId": "dev.output.keypad",
+    "productName": "Output",
+    "files": [
+      "package.json",
+      "electron/**",
+      "src/**",
+      "tools/lib/**",
+      "config/calibration.json",
+      "!**/*.test.js",
+      "!**/node_modules/node-hid/hidapi/**",
+      "!**/node_modules/keysynth/src/**",
+      "!**/node_modules/keysynth/binding.gyp"
+    ],
+    "asarUnpack": [
+      "node_modules/node-hid/**",
+      "node_modules/pkg-prebuilds/**",
+      "node_modules/keysynth/**"
+    ],
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "target": [
+        "dir"
+      ],
+      "extendInfo": {
+        "LSUIElement": true,
+        "NSAppleEventsUsageDescription": "조이스틱·노브·레이어 단축키를 보내고 창 위치를 바꾸려면 System Events 제어가 필요합니다."
+      },
+      "icon": "build/icon.png",
+      "hardenedRuntime": true,
+      "x64ArchFiles": "Contents/Resources/app.asar.unpacked/node_modules/node-hid/prebuilds/**/*.node"
+    },
+    "directories": {
+      "output": "dist"
+    },
+    "dmg": {
+      "title": "Output ${version}",
+      "artifactName": "Output-${version}-mac-universal.${ext}"
+    }
+  }
+}

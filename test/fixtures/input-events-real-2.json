@@ -1,0 +1,434 @@
+{
+ "_note": "실기 9차 실측 (2026-09-21). 노브 양방향 확인. 조이스틱은 약하게 밀었고 키 이벤트가 섞였다.",
+ "records": {
+  "key-1-1": {
+   "skipped": false,
+   "events": [
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "AG00",
+      "act": 1
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "AG00",
+      "act": 0
+     }
+    }
+   ]
+  },
+  "key-1-2": {
+   "skipped": false,
+   "events": [
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "AG01",
+      "act": 1
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "AG01",
+      "act": 0
+     }
+    }
+   ]
+  },
+  "key-2-1": {
+   "skipped": false,
+   "events": [
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "AG02",
+      "act": 1
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "AG02",
+      "act": 0
+     }
+    }
+   ]
+  },
+  "key-2-2": {
+   "skipped": false,
+   "events": [
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "AG03",
+      "act": 1
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "AG03",
+      "act": 0
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "AG03",
+      "act": 1
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "AG03",
+      "act": 0
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "AG03",
+      "act": 1
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "AG03",
+      "act": 0
+     }
+    }
+   ]
+  },
+  "key-2-3": {
+   "skipped": false,
+   "events": [
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "AG04",
+      "act": 1
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "AG04",
+      "act": 0
+     }
+    }
+   ]
+  },
+  "key-2-4": {
+   "skipped": false,
+   "events": [
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "AG05",
+      "act": 1
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "AG05",
+      "act": 0
+     }
+    }
+   ]
+  },
+  "key-3-1": {
+   "skipped": false,
+   "events": [
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "ACT06",
+      "act": 1
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "ACT06",
+      "act": 0
+     }
+    }
+   ]
+  },
+  "key-3-2": {
+   "skipped": false,
+   "events": [
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "ACT07",
+      "act": 1
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "ACT07",
+      "act": 0
+     }
+    }
+   ]
+  },
+  "key-3-3": {
+   "skipped": false,
+   "events": [
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "ACT08",
+      "act": 1
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "ACT08",
+      "act": 0
+     }
+    }
+   ]
+  },
+  "key-3-4": {
+   "skipped": false,
+   "events": [
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "ACT09",
+      "act": 1
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "ACT09",
+      "act": 0
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "ACT09",
+      "act": 1
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "ACT09",
+      "act": 0
+     }
+    }
+   ]
+  },
+  "key-4-1": {
+   "skipped": false,
+   "events": [
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "ACT10",
+      "act": 1
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "ACT10",
+      "act": 0
+     }
+    }
+   ]
+  },
+  "key-4-2": {
+   "skipped": false,
+   "events": [
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "ACT11",
+      "act": 1
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "ACT11",
+      "act": 0
+     }
+    }
+   ]
+  },
+  "key-4-3": {
+   "skipped": false,
+   "events": [
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "ACT12",
+      "act": 1
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "ACT12",
+      "act": 0
+     }
+    }
+   ]
+  },
+  "dial-cw": {
+   "skipped": false,
+   "events": [
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "ENC_CC",
+      "act": 2
+     }
+    }
+   ]
+  },
+  "dial-ccw": {
+   "skipped": false,
+   "events": [
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "ENC_CW",
+      "act": 2
+     }
+    }
+   ]
+  },
+  "dial-click": {
+   "skipped": false,
+   "events": [
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "ENC_CLK",
+      "act": 1
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "ENC_CLK",
+      "act": 0
+     }
+    }
+   ]
+  },
+  "joy-up": {
+   "skipped": false,
+   "events": [
+    {
+     "m": "v.oai.rad",
+     "p": {
+      "a": 0.743557,
+      "d": 0.050623
+     }
+    },
+    {
+     "m": "v.oai.rad",
+     "p": {
+      "a": 0,
+      "d": 0
+     }
+    }
+   ]
+  },
+  "joy-down": {
+   "skipped": false,
+   "events": [
+    {
+     "m": "v.oai.rad",
+     "p": {
+      "a": 0.252644,
+      "d": 0.238541
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "AG05",
+      "act": 1
+     }
+    },
+    {
+     "m": "v.oai.rad",
+     "p": {
+      "a": 0,
+      "d": 0
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "AG05",
+      "act": 0
+     }
+    }
+   ]
+  },
+  "joy-left": {
+   "skipped": false,
+   "events": [
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "AG01",
+      "act": 1
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "AG01",
+      "act": 0
+     }
+    }
+   ]
+  },
+  "joy-right": {
+   "skipped": false,
+   "events": [
+    {
+     "m": "v.oai.rad",
+     "p": {
+      "a": 0.021669,
+      "d": 0.403627
+     }
+    },
+    {
+     "m": "v.oai.rad",
+     "p": {
+      "a": 0.013902,
+      "d": 0.7195
+     }
+    },
+    {
+     "m": "v.oai.rad",
+     "p": {
+      "a": 0,
+      "d": 0
+     }
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.DS_Store
+*.log
+.superpowers/
+# doctor --save 가 만드는 조사 결과. 예전 조사라 내용이 틀렸고 앱은 쓰지 않는다
+config/capability.json
+# calibrate --apply 가 기존 보정 파일을 백업하는 곳
+config/backups/
+native/keysynth/build/
+# 서명 키·인증서는 커밋하지 않는다 (2026-10-10)
+*.pem
+*.p12
+*.key
+*.cer

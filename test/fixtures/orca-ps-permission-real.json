@@ -1,0 +1,120 @@
+{
+  "_provenance": {
+    "capturedAt": "2026-09-23",
+    "what": "권한 승인 프롬프트가 떠 있는 순간의 Orca worktree ps + terminal list",
+    "observed": [
+      "worktree.status = 'permission'",
+      "agent.state = 'waiting' (codex, claude 각 1개)",
+      "agent.paneKey / parentPaneKey / agentType / toolName / interrupted / stateStartedAt",
+      "terminal.handle / tabId / leafId / title / agentIdentity",
+      "터미널 제목에 '[ ! ] Action Required'가 붙는다"
+    ],
+    "defaulted": [
+      "terminal.connected / writable / orphaned / lastOutputAt — 이 캡처에서 기록하지 못해",
+      "살아 있는 터미널의 기본값으로 채웠다. 조인·상태 판정에는 쓰이지 않는다."
+    ],
+    "why": "승인 대기는 이 제품에서 가장 중요한 상태인데 사용자가 프롬프트를 처리하면 사라진다. 재현이 어려워 별도로 보존한다."
+  },
+  "worktrees": [
+    {
+      "worktreeId": "4104478c-3942-4d09-aeb6-c05b76bd4cc8::<path>",
+      "displayName": "sample-app",
+      "branch": "refs/heads/sample-app",
+      "workspaceStatus": "in-progress",
+      "status": "permission",
+      "unread": true,
+      "isArchived": false,
+      "isPinned": false,
+      "sortOrder": 1790167881516,
+      "liveTerminalCount": 3,
+      "agents": [
+        {
+          "paneKey": "fa978bdc-589d-4c37-8e4c-df1ae8b414b0:b88fbd3b-b547-48b9-817d-a06c19b0d133",
+          "parentPaneKey": null,
+          "state": "waiting",
+          "agentType": "codex",
+          "taskTitle": null,
+          "displayName": null,
+          "toolName": "Bash",
+          "interrupted": false,
+          "stateStartedAt": 1790167878485,
+          "updatedAt": 1790167878485
+        },
+        {
+          "paneKey": "3c181928-ce60-493f-ab27-0e21f9f5e680:c59e8b12-983b-479f-a82f-c46ea6499e7e",
+          "parentPaneKey": null,
+          "state": "waiting",
+          "agentType": "claude",
+          "taskTitle": null,
+          "displayName": null,
+          "toolName": "Bash",
+          "interrupted": false,
+          "stateStartedAt": 1790167939312,
+          "updatedAt": 1790167939312
+        },
+        {
+          "paneKey": "9ea59de0-e18e-466c-ba86-90a72f487b88:da29e82d-183b-41d7-8a32-06548e9c60aa",
+          "parentPaneKey": null,
+          "state": "done",
+          "agentType": "codex",
+          "taskTitle": null,
+          "displayName": null,
+          "toolName": null,
+          "interrupted": false,
+          "stateStartedAt": 1790168076033,
+          "updatedAt": 1790168076033
+        }
+      ]
+    }
+  ],
+  "terminals": [
+    {
+      "handle": "term_3b835c19-904d-4ba5-9b27-b95e7d9e7efe",
+      "worktreeId": "4104478c-3942-4d09-aeb6-c05b76bd4cc8::<path>",
+      "tabId": "fa978bdc-589d-4c37-8e4c-df1ae8b414b0",
+      "leafId": "b88fbd3b-b547-48b9-817d-a06c19b0d133",
+      "title": "[ ! ] Action Required | 파일 쓰기 | sample-app",
+      "connected": true,
+      "writable": true,
+      "orphaned": false,
+      "lastOutputAt": 1790167878485,
+      "agentIdentity": "codex"
+    },
+    {
+      "handle": "term_58642b25-4a0e-4103-91b4-42280faa5cc2",
+      "worktreeId": "4104478c-3942-4d09-aeb6-c05b76bd4cc8::<path>",
+      "tabId": "3c181928-ce60-493f-ab27-0e21f9f5e680",
+      "leafId": "c59e8b12-983b-479f-a82f-c46ea6499e7e",
+      "title": "✳ 텍스트 파일 생성",
+      "connected": true,
+      "writable": true,
+      "orphaned": false,
+      "lastOutputAt": 1790167939312,
+      "agentIdentity": "claude"
+    },
+    {
+      "handle": "term_981166b9-cae6-4318-8b49-09e04e152b59",
+      "worktreeId": "4104478c-3942-4d09-aeb6-c05b76bd4cc8::<path>",
+      "tabId": "9ea59de0-e18e-466c-ba86-90a72f487b88",
+      "leafId": "da29e82d-183b-41d7-8a32-06548e9c60aa",
+      "title": "샘플 작업 | sample-app",
+      "connected": true,
+      "writable": true,
+      "orphaned": false,
+      "lastOutputAt": 1790168076033,
+      "agentIdentity": "codex"
+    },
+    {
+      "handle": "term_ecffe082-f3d9-44fd-8c25-fe9a61886fbb",
+      "worktreeId": "4104478c-3942-4d09-aeb6-c05b76bd4cc8::<path>",
+      "tabId": "79c7ab20-0835-4a59-9bbf-209827462348",
+      "leafId": "de543c61-8ffb-44a0-a389-0acad52b5a3e",
+      "title": "Terminal 1",
+      "connected": true,
+      "writable": true,
+      "orphaned": false,
+      "lastOutputAt": 1790167800000,
+      "agentIdentity": null
+    }
+  ]
+}

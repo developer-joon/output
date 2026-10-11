@@ -1,0 +1,11 @@
+{
+  "name": "keysynth",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Output — macOS 키 입력(CGEvent)·자판·키 반복 설정 (N-API)",
+  "main": "index.js",
+  "gypfile": true,
+  "scripts": { "install": "node-gyp rebuild" },
+  "dependencies": { "node-addon-api": "^8.0.0" },
+  "os": ["darwin"]
+}

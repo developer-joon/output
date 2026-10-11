@@ -1,0 +1,84 @@
+{
+  "_note": "실기 실측 덤프 (2026-09-20, Creator Micro 2 fw 0.6.2, PID 0x8298). doctor --dump-keymap 출력 그대로.",
+  "info": {
+    "product": "Creator Micro 2",
+    "vendorId": 12346,
+    "productId": 33432
+  },
+  "version": {
+    "version": "0.6.2"
+  },
+  "status": {
+    "version": "0.6.2",
+    "profile_index": 0,
+    "layer_index": 1,
+    "battery": 99,
+    "is_charging": true
+  },
+  "keymap": {
+    "activeProfileId": null,
+    "profiles": [
+      {
+        "id": "default",
+        "layers": [
+          {
+            "name": "Orca",
+            "layout": {
+              "keymap": [
+                [
+                  "KC_NONE",
+                  "KC_NONE"
+                ],
+                [
+                  "KA_A1",
+                  "KA_A2",
+                  "KA_A3",
+                  "KA_A4"
+                ],
+                [
+                  "KA_A5",
+                  "KA_A6",
+                  "KA_A7",
+                  "KA_A8"
+                ],
+                [
+                  "KA_A9",
+                  "KA_A10",
+                  "KA_A11"
+                ]
+              ]
+            }
+          },
+          {
+            "name": "ChatGPT",
+            "layout": {
+              "keymap": [
+                [
+                  "KV_OAI_AG00",
+                  "KV_OAI_AG01"
+                ],
+                [
+                  "KV_OAI_AG02",
+                  "KV_OAI_AG03",
+                  "KV_OAI_AG04",
+                  "KV_OAI_AG05"
+                ],
+                [
+                  "KV_OAI_ACT06",
+                  "KV_OAI_ACT07",
+                  "KV_OAI_ACT08",
+                  "KV_OAI_ACT09"
+                ],
+                [
+                  "KV_OAI_ACT10",
+                  "KV_OAI_ACT11",
+                  "KV_OAI_ACT12"
+                ]
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

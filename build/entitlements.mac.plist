@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!-- Electron(V8) JIT — hardened runtime에서 필요 -->
+  <key>com.apple.security.cs.allow-jit</key>
+  <true/>
+  <!-- System Events 제어(osascript: 키 합성 예비 길·창 위치) -->
+  <key>com.apple.security.automation.apple-events</key>
+  <true/>
+</dict>
+</plist>

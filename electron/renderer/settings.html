@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:">
+<title>Output 설정</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="set">
+  <nav aria-label="설정 메뉴">
+    <div class="brand">Output</div>
+    <button data-nav="layers">레이어</button>
+    <button data-nav="presets">프리셋</button>
+    <button data-nav="prefs">설정</button>
+    <button data-nav="about" class="nav-bottom">정보 · 진단</button>
+  </nav>
+  <main id="main"></main>
+</div>
+<script type="module" src="settings.js"></script>
+</body>
+</html>

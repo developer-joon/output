@@ -1,0 +1,461 @@
+{
+ "_note": "실기 8차 실측 (2026-09-21, Creator Micro 2 fw 0.6.2). doctor --input 출력에서 재구성. 일부 단계는 중복 입력이 있었다.",
+ "records": {
+  "key-1-1": {
+   "skipped": false,
+   "events": [
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "AG00",
+      "act": 1
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "AG00",
+      "act": 0
+     }
+    }
+   ]
+  },
+  "key-1-2": {
+   "skipped": false,
+   "events": [
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "AG01",
+      "act": 1
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "AG01",
+      "act": 0
+     }
+    }
+   ]
+  },
+  "key-2-1": {
+   "skipped": false,
+   "events": [
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "AG02",
+      "act": 1
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "AG02",
+      "act": 0
+     }
+    }
+   ]
+  },
+  "key-2-2": {
+   "skipped": false,
+   "events": [
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "AG03",
+      "act": 1
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "AG03",
+      "act": 0
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "AG03",
+      "act": 1
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "AG03",
+      "act": 0
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "AG03",
+      "act": 1
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "AG03",
+      "act": 0
+     }
+    }
+   ]
+  },
+  "key-2-3": {
+   "skipped": false,
+   "events": [
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "AG04",
+      "act": 1
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "AG04",
+      "act": 0
+     }
+    }
+   ]
+  },
+  "key-2-4": {
+   "skipped": false,
+   "events": [
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "AG05",
+      "act": 1
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "AG05",
+      "act": 0
+     }
+    }
+   ]
+  },
+  "key-3-1": {
+   "skipped": false,
+   "events": [
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "ACT06",
+      "act": 1
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "ACT06",
+      "act": 0
+     }
+    }
+   ]
+  },
+  "key-3-2": {
+   "skipped": false,
+   "events": [
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "ACT07",
+      "act": 1
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "ACT07",
+      "act": 0
+     }
+    }
+   ]
+  },
+  "key-3-3": {
+   "skipped": false,
+   "events": [
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "ACT08",
+      "act": 1
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "ACT08",
+      "act": 0
+     }
+    }
+   ]
+  },
+  "key-3-4": {
+   "skipped": false,
+   "events": [
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "ACT09",
+      "act": 1
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "ACT09",
+      "act": 0
+     }
+    }
+   ]
+  },
+  "key-4-1": {
+   "skipped": false,
+   "events": [
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "ACT10",
+      "act": 1
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "ACT10",
+      "act": 0
+     }
+    }
+   ]
+  },
+  "key-4-2": {
+   "skipped": false,
+   "events": [
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "ACT11",
+      "act": 1
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "ACT11",
+      "act": 0
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "ACT11",
+      "act": 1
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "ACT11",
+      "act": 0
+     }
+    }
+   ]
+  },
+  "key-4-3": {
+   "skipped": false,
+   "events": [
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "ACT12",
+      "act": 1
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "ACT12",
+      "act": 0
+     }
+    }
+   ]
+  },
+  "dial-cw": {
+   "skipped": false,
+   "events": [
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "ENC_CC",
+      "act": 2
+     }
+    }
+   ]
+  },
+  "dial-ccw": {
+   "skipped": false,
+   "events": []
+  },
+  "dial-click": {
+   "skipped": false,
+   "events": [
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "ENC_CLK",
+      "act": 1
+     }
+    },
+    {
+     "m": "v.oai.hid",
+     "p": {
+      "k": "ENC_CLK",
+      "act": 0
+     }
+    }
+   ]
+  },
+  "joy-up": {
+   "skipped": false,
+   "events": [
+    {
+     "m": "v.oai.rad",
+     "p": {
+      "a": 0.745413,
+      "d": 0.142481
+     }
+    },
+    {
+     "m": "v.oai.rad",
+     "p": {
+      "a": 0.747291,
+      "d": 0.363589
+     }
+    },
+    {
+     "m": "v.oai.rad",
+     "p": {
+      "a": 0.747842,
+      "d": 0.501441
+     }
+    },
+    {
+     "m": "v.oai.rad",
+     "p": {
+      "a": 0.748025,
+      "d": 0.564051
+     }
+    },
+    {
+     "m": "v.oai.rad",
+     "p": {
+      "a": 0.748,
+      "d": 0.9
+     }
+    },
+    {
+     "m": "v.oai.rad",
+     "p": {
+      "a": 0.7479,
+      "d": 1
+     }
+    },
+    {
+     "m": "v.oai.rad",
+     "p": {
+      "a": 0,
+      "d": 0
+     }
+    }
+   ]
+  },
+  "joy-down": {
+   "skipped": false,
+   "events": [
+    {
+     "m": "v.oai.rad",
+     "p": {
+      "a": 0.254931,
+      "d": 0.120232
+     }
+    },
+    {
+     "m": "v.oai.rad",
+     "p": {
+      "a": 0.251243,
+      "d": 1
+     }
+    },
+    {
+     "m": "v.oai.rad",
+     "p": {
+      "a": 0,
+      "d": 0
+     }
+    }
+   ]
+  },
+  "joy-left": {
+   "skipped": false,
+   "events": [
+    {
+     "m": "v.oai.rad",
+     "p": {
+      "a": 0.468475,
+      "d": 0.206125
+     }
+    },
+    {
+     "m": "v.oai.rad",
+     "p": {
+      "a": 0.489751,
+      "d": 1
+     }
+    },
+    {
+     "m": "v.oai.rad",
+     "p": {
+      "a": 0,
+      "d": 0
+     }
+    }
+   ]
+  },
+  "joy-right": {
+   "skipped": false,
+   "events": [
+    {
+     "m": "v.oai.rad",
+     "p": {
+      "a": 0.023019,
+      "d": 0.357859
+     }
+    },
+    {
+     "m": "v.oai.rad",
+     "p": {
+      "a": 0.010481,
+      "d": 1
+     }
+    },
+    {
+     "m": "v.oai.rad",
+     "p": {
+      "a": 0,
+      "d": 0
+     }
+    }
+   ]
+  }
+ }
+}
