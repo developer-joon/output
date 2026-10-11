@@ -9,7 +9,7 @@ const INVOKE = new Set([
   'cb:layers:get', 'cb:layers:save', 'cb:apps:running', 'cb:apps:installed', 'cb:apps:pick', 'cb:action:try', 'cb:layers:forApp', 'cb:layers:export', 'cb:layers:import',
   'cb:presets:list', 'cb:presets:copy', 'cb:layers:orcaUnlinked', 'cb:device:status', 'cb:device:plan', 'cb:device:apply', 'cb:keymap:backups', 'cb:keymap:restore',
   'cb:diagnostics:export', 'cb:autostart:get', 'cb:autostart:set', 'cb:prefs:get', 'cb:prefs:set', 'cb:usage:get', 'cb:layers:pick',
-  'cb:setup:get', 'cb:setup:complete', 'cb:pause', 'cb:logs', 'cb:info', 'cb:quit', 'cb:openStateDir',
+  'cb:setup:get', 'cb:setup:complete', 'cb:pause', 'cb:logs', 'cb:info', 'cb:quit', 'cb:openStateDir', 'cb:update:install',
 ]);
 const EVENTS = new Set(['cb:view', 'cb:tab', 'cb:hud']);
 

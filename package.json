@@ -1,6 +1,6 @@
 {
   "name": "output",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "type": "module",
   "description": "Output — AI 에이전트 작업 상태를 키보드 LED로 보여주고, 한 번 눌러 그곳으로",
@@ -20,7 +20,8 @@
     "app:smoke": "electron . --smoke",
     "dist": "electron-builder --mac --dir",
     "dist:dmg": "APPLE_KEYCHAIN_PROFILE=output electron-builder --mac dmg --universal",
-    "dist:dmg:local": "electron-builder --mac dmg --universal -c.mac.identity=- -c.mac.hardenedRuntime=false -c.mac.notarize=false"
+    "dist:dmg:local": "electron-builder --mac dmg --universal -c.mac.identity=- -c.mac.hardenedRuntime=false -c.mac.notarize=false",
+    "release": "APPLE_KEYCHAIN_PROFILE=output GH_TOKEN=$(gh auth token) electron-builder --mac dmg zip --universal --publish always"
   },
   "engines": {
     "node": ">=24.0.0"
@@ -73,6 +74,17 @@
     "dmg": {
       "title": "Output ${version}",
       "artifactName": "Output-${version}-mac-universal.${ext}"
-    }
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "developer-joon",
+        "repo": "output",
+        "releaseType": "release"
+      }
+    ]
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.9"
   }
 }

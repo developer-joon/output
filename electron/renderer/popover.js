@@ -100,6 +100,10 @@ function render(v) {
     : null;
 
   const warnings = v.warnings.length ? h('div', { class: 'warnings' }, v.warnings.map(warningEl)) : null;
+  // 새 버전을 받아 두었으면 누를 때 설치 (2026-10-11 자동 업데이트: 알림 후 사용자가 누르면)
+  const update = v.update?.state === 'ready' ? h('div', { class: 'notice info', style: { margin: '8px 12px 0' }, dataset: { warning: 'update' } },
+    `새 버전 ${v.update.version}이 준비됐습니다.`,
+    h('button', { onclick: () => cb.invoke('cb:update:install') }, '다시 시작해서 업데이트')) : null;
   // 앞 앱에 레이어가 없으면 만들기 제안 (2026-10-10)
   const suggest = v.suggestLayer ? h('div', { class: 'suggest' },
     h('span', { class: 'grow' }, `'${v.suggestLayer.name}'에는 레이어가 없습니다.`),
@@ -117,7 +121,7 @@ function render(v) {
   // 키 그림 (Orca 세션 탭도 키 배열, 2026-10-06). 대기에는 아무것도 그리지 않는다 (2026-10-11 사용자 피드백:
   // 키보드가 쉬는데 Orca 세션 목록이 보이면 작업 칸이 켜진 것처럼 보인다). 대기 이유는 아래 안내, 레이어는 위 칩으로 고른다
   const body = !v.keyMap ? null : keyMapEl(v.keyMap, { sessions: v.tabs && tab !== 'keys' });
-  mount(app, header, sub, layerChips, paused, restoring, suggest, tabs, body, warnings, event, footer);
+  mount(app, header, sub, layerChips, update, paused, restoring, suggest, tabs, body, warnings, event, footer);
   // 높이 = 자식 높이 + 바깥 여백(margin) + 틀의 안쪽 여백 (2026-10-10: 여백을 빼먹어 '레이어 만들기' 칸이 뜨면 스크롤이 생겼다)
   const px = (v) => parseFloat(v) || 0;
   const box = getComputedStyle(app);

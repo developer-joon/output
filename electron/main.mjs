@@ -8,8 +8,9 @@
  * 정책은 여기 없다. src/ 는 Electron을 모른다.
  */
 import {
-  app, BrowserWindow, Tray, nativeImage, ipcMain, dialog, powerMonitor, systemPreferences, screen, shell, Menu,
+  app, BrowserWindow, Tray, nativeImage, ipcMain, dialog, powerMonitor, systemPreferences, screen, shell, Menu, Notification,
 } from 'electron';
+import electronUpdater from 'electron-updater';
 import path from 'node:path';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -27,6 +28,7 @@ import { createHud } from './hud.mjs';
 import { appMenuTemplate } from './appMenu.mjs';
 import { appendLog } from '../src/service/logFile.js';
 import { smoke } from './smoke.mjs';
+import { createUpdater } from './updater.mjs';
 import {
   frontmostBundleId, isProcessRunning, synthKeystroke, openSettings,
   openApp, openUrl, execCommand, readClipboard, writeClipboard, moveWindow, hasWindow, screenshot,
@@ -66,6 +68,7 @@ let popover = null;
 let settings = null;
 let locked = false;
 let paused = false;
+let updater = null;   // 자동 업데이트 (updater.mjs, 2026-10-11)
 let pushTimer = null;
 
 // ───────────── 설정 파일 (설치 마법사 진행 여부)
@@ -137,6 +140,7 @@ function createService() {
 function currentView() {
   const v = service.view();
   v.paused = paused;
+  v.update = updater?.state ?? null;
   return v;
 }
 
@@ -379,6 +383,7 @@ function registerIpc() {
   handle('cb:logs', () => service.logs.slice(-100));
   handle('cb:info', () => ({ versions: service.versions, stateDir: STATE_DIR }));
   handle('cb:quit', () => { app.quit(); });
+  handle('cb:update:install', () => updater?.install() ?? false);
   handle('cb:openStateDir', () => shell.openPath(STATE_DIR));
 }
 
@@ -420,6 +425,20 @@ async function main() {
   await service.start();
   trace('main: service 시작됨');
   schedulePush();
+
+  // 자동 업데이트: 받아 두고 알림 → 상태판 버튼으로 설치 (2026-10-11). 점검(smoke)·개발 실행에서는 끈다
+  updater = createUpdater({
+    autoUpdater: electronUpdater.autoUpdater, isPackaged: app.isPackaged && !SMOKE,
+    onChange: (s) => { trace(`update ${s.state}${s.version ? ` ${s.version}` : ''}`); schedulePush(); },
+    notify: ({ title, body }) => {
+      if (!Notification.isSupported()) return;
+      const n = new Notification({ title, body });
+      n.on('click', () => { if (!popover?.isVisible()) togglePopover(); });
+      n.show();
+    },
+    log: trace,
+  });
+  updater.start();
 
   const setup = readSetup();
   trace(`main: setup completed=${Boolean(setup.completed)}`);
