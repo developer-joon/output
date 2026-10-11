@@ -15,7 +15,7 @@ const WHITE = 0xffffff;
 /** LED 테스트 한 단계: k번(0~12)만 켜거나, k = 13이면 언더글로우만. 나머지는 끈다 */
 export function ledTestPayload(k) {
   const out = [];
-  for (let id = 0; id < KEY_COUNT; id++) out.push(id === k ? { id, c: WHITE, e: 1, s: 0.5 } : { id, c: 0, e: 0 });
+  for (let id = 0; id < KEY_COUNT; id++) out.push(id === k ? { id, c: WHITE, b: 1, e: 1, s: 0.5 } : { id, c: 0, e: 0 });
   out.push(k === UNDERGLOW_ID ? { id: UNDERGLOW_ID, c: WHITE, b: 1, e: 1, s: 0.5, sa: 1 } : { id: UNDERGLOW_ID, c: 0, e: 0, sa: 1 });
   return out;
 }

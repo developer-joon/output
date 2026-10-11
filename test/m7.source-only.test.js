@@ -114,7 +114,7 @@ describe('M7 / 장치 — 대기 씬과 복원 페이로드', () => {
     const p = sent[0];
     assert.equal(p.length, 14);
     // 장치로는 짧은 명령 (2026-10-10)
-    for (let i = 0; i < 13; i += 1) assert.deepEqual(p[i], { id: i, c: 0x1a1a4d, e: 1, s: 0.5 });
+    for (let i = 0; i < 13; i += 1) assert.deepEqual(p[i], { id: i, c: 0x1a1a4d, b: 1, e: 1, s: 0.5 });   // 켜진 키도 b (2026-10-12)
     assert.deepEqual(p[13], { id: 13, c: 0, e: 0, sa: 1 });
 
     driver.restoreColor = null;                          // 레이어 색을 아직 모르면 전부 끔

@@ -236,7 +236,8 @@ import { readFileSync } from 'node:fs';
 describe('M19 / 짧은 LED 명령 (실기 2026-10-10: 기본값을 빼도 같은 색)', () => {
   it('S01 꺼진 칸은 {id,c:0,e:0}(e를 빼면 앞 효과가 남는다, 2026-10-10), 켜진 칸은 {id,c,e,s}, 언더글로우는 sa:1과 (켜졌으면) b를 남긴다', () => {
     assert.deepEqual(slimEntry({ id: 3, c: 0, b: 0, e: 0, s: 0.5, sk: 0, sa: 0 }), { id: 3, c: 0, e: 0 });
-    assert.deepEqual(slimEntry({ id: 1, c: 0xff0000, b: 1, e: 6, s: 0.9, sk: 0, sa: 0 }), { id: 1, c: 0xff0000, e: 6, s: 0.9 });
+    // 2026-10-12 실기(다른 Mac): 켜진 키도 b를 보낸다 — 장치가 다시 켜져 b가 초기값이면 b 없는 키는 색을 보내도 꺼져 있다
+    assert.deepEqual(slimEntry({ id: 1, c: 0xff0000, b: 1, e: 6, s: 0.9, sk: 0, sa: 0 }), { id: 1, c: 0xff0000, b: 1, e: 6, s: 0.9 });
     // 언더글로우는 b가 없으면 켜지지 않는다 (실기 2026-10-10) — 켜진 언더글로우는 b를 남긴다
     assert.deepEqual(slimEntry({ id: 13, c: 0x00ff00, b: 1, e: 1, s: 0.5, sk: 0, sa: 1 }), { id: 13, c: 0x00ff00, b: 1, e: 1, s: 0.5, sa: 1 });
     assert.deepEqual(slimEntry({ id: 13, c: 0, b: 0, e: 0, s: 0.5, sk: 0, sa: 1 }), { id: 13, c: 0, e: 0, sa: 1 });

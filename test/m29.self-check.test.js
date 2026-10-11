@@ -44,6 +44,7 @@ describe('M29 / 점검하기', () => {
     for (let k = 0; k < 13; k++) {
       const lit = steps[k].filter((e) => e.c);
       assert.deepEqual(lit.map((e) => e.id), [k], `${k}번째 단계는 키 ${k}만`);
+      assert.equal(lit[0].b, 1, '켜는 키는 b:1 — 장치의 b가 초기값이어도 켜진다 (2026-10-12)');
     }
     assert.deepEqual(steps[13].filter((e) => e.c).map((e) => e.id), [13], '마지막은 언더글로우');
     assert.equal(steps[13].find((e) => e.id === 13).sa, 1);

@@ -46,12 +46,13 @@ export function indexOfLogical(calibration, logical) {
 const DEFAULT_PAYLOAD_PARAMS = Object.freeze({ b: 1, e: 1, s: 0.5, sk: 0, sa: 0 });
 
 /**
- * 장치로 보낼 짧은 항목 (실기 2026-10-10): 키는 b·sk와 꺼진 칸의 s를 빼도 같은 색이다. 꺼진 칸의 e(0)는 빼면 안 된다.
- * 블루투스에서 한 번에 14프레임 → 9프레임. 언더글로우는 sa:1과, 켜졌으면 b를 남긴다.
+ * 장치로 보낼 짧은 항목 (실기 2026-10-10): sk와 꺼진 칸의 s는 빼도 같은 색이다. 꺼진 칸의 e(0)는 빼면 안 된다.
+ * 켜진 칸은 키도 언더글로우도 b를 남긴다 (실기 2026-10-12 다른 Mac: 장치가 다시 켜져 b가 초기값이면 b 없는 키는
+ * 색을 보내도 꺼져 있었다 — 10-10 확인은 b가 이미 1이던 장치에서 한 것). 언더글로우는 sa:1도.
  */
 export function slimEntry(e) {
   const o = { id: e.id, c: e.c };
-  if (e.c && e.sa) o.b = e.b;          // 언더글로우는 b가 없으면 켜지지 않는다 (실기 2026-10-10)
+  if (e.c) o.b = e.b;                  // 켜진 칸은 b — 없으면 장치에 남은 b(초기값이면 꺼짐)를 쓴다 (실기 2026-10-10 언더글로우, 10-12 키)
   if (e.c) { o.e = e.e; o.s = e.s; } else o.e = 0;   // 꺼진 칸도 e:0 — 빼면 장치가 앞 효과(인사 회전 등)를 계속 쓴다 (실기 2026-10-10)
   if (e.sk) o.sk = e.sk;
   if (e.sa) o.sa = e.sa;
