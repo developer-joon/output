@@ -83,10 +83,10 @@ function render(v) {
     h('span', {}, v.bankLabelKo),
   );
   const layerChips = v.layerLine?.layers?.length ? h('div', { class: 'layer-chips', 'aria-label': '레이어' },
-    // 누르면 그 레이어로 (2026-10-11) — 노브로 고른 것과 같다: 지금 앞 앱인 동안만. 고른 동안은 '자동' 칩으로 되돌린다
+    // 누르면 그 레이어로 고정 (2026-10-11) — 노브로 고른 것과 같다: 풀 때까지. 고정한 동안은 '자동' 칩으로 되돌린다
     v.layerLine.pinned ? h('button', { class: 'lchip auto', title: '앞 앱 따라 레이어 고르기', onclick: () => cb.invoke('cb:layers:pick', null) }, '자동') : null,
     v.layerLine.layers.map((l) => h('button', {
-      class: `lchip${l.active ? ' on' : ''}`, title: l.active ? '지금 쓰는 레이어' : `누르면 '${l.name}' 레이어로 (지금 앞 앱인 동안)`,
+      class: `lchip${l.active ? ' on' : ''}`, title: l.active ? '지금 쓰는 레이어' : `누르면 '${l.name}' 레이어로 고정 ('자동'으로 풀기)`,
       // 색이 곧 표시: 지금 레이어는 레이어 색으로 채우고, 나머지는 테두리만
       style: l.active ? { background: l.color, borderColor: l.color } : { borderColor: l.color },
       onclick: () => { if (!l.active) cb.invoke('cb:layers:pick', l.id); },

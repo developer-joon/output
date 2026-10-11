@@ -1,7 +1,7 @@
 /**
  * OutputService의 '노브 길게 눌러 레이어 고르기' (2026-10-10 사용자 요청).
  * 길게 → 목록(자동 + 레이어들) 화면 표시 → 노브로 옮기고 → 누르면 고름. 5초 입력이 없거나 다른 입력이면 취소.
- * 고른 레이어(_pin)는 지금 앞 앱이 그대로인 동안만 — 앞 앱이 바뀌거나 '자동'을 고르면 앞 앱 따라 (_reevaluateMode).
+ * 고른 레이어(_pin)는 풀 때까지 고정 (2026-10-11) — '자동'을 고르거나 앱을 다시 시작하면 앞 앱 따라 (_reevaluateMode).
  * OutputService.prototype에 붙는다 — this는 서비스다.
  */
 const PICKER_IDLE_MS = 5000;
@@ -37,11 +37,11 @@ export class LayerPickerMethods {
 
   /**
    * 레이어 고르기 — 노브 목록과 상태판 칩이 함께 쓴다 (2026-10-11). id = null이면 자동(앞 앱 따라).
-   * 고른 레이어는 지금 앞 앱이 그대로인 동안만 (_reevaluateMode가 푼다)
+   * 고른 레이어는 풀 때까지 고정 (2026-10-11)
    */
   pickLayer(id) {
     if (id && !this.layers.some((l) => l.id === id)) return { ok: false, errorKo: '그 레이어를 찾지 못했습니다.' };
-    this._pin = id ? { layerId: id, front: this._front } : null;
+    this._pin = id ? { layerId: id } : null;
     this._reevaluateMode();
     this._changed();
     return { ok: true };

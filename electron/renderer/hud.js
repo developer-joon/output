@@ -54,9 +54,9 @@ function render() {
   root.replaceChildren();
   if (!hud) return;
   if (hud.kind === 'picker') {
-    // 노브로 레이어 고르기 (2026-10-10): 돌려서 옮기고 누르면 고름
+    // 노브로 레이어 고르기 (2026-10-10): 돌려서 옮기고 누르면 고정 (2026-10-11: 풀 때까지, '자동'이 풀기)
     const box = el('div', 'plate picker');
-    box.append(el('div', 'picker-title', '레이어 고르기'));
+    box.append(el('div', 'picker-title', hud.pinned ? '레이어 고르기 · 지금 고정됨' : '레이어 고르기'));
     const list = el('div', 'picker-list');
     hud.items.forEach((it, i) => {
       const row = el('div', `picker-item${i === hud.index ? ' on' : ''}`);
@@ -65,7 +65,7 @@ function render() {
       row.append(dot, el('span', 'picker-name', it.name));
       list.append(row);
     });
-    box.append(list, el('div', 'picker-help', '돌려서 고르고 누르세요'));
+    box.append(list, el('div', 'picker-help', '돌려서 고르고 누르면 고정 · 자동 = 앞 앱 따라'));
     root.append(box);
     list.children[hud.index]?.scrollIntoView({ block: 'nearest' });
     return;

@@ -161,7 +161,7 @@ export class OutputService extends EventEmitter {
     this._hudJoy = { dir: null, enteredAt: null };   // 화면 표시: 지금 들어간 방향과 그 시각
     this._prefs = this._loadPrefs();
     this._picker = null;   // 노브로 레이어 고르는 중 (2026-10-10)
-    this._pin = null;      // 노브로 고른 레이어 {layerId, front}
+    this._pin = null;      // 노브·상태판으로 고른 레이어 {layerId} — 풀 때까지 고정 (2026-10-11)
     this.usage = new Usage({ file: path.join(stateDir, 'usage.json'), now: this.now });
     this._everConnected = false;
     this.dispatch = makeDispatcher(this.bridge);
@@ -466,9 +466,10 @@ export class OutputService extends EventEmitter {
 
   /** 앞 앱으로 레이어와 모드를 정한다 (프리셋 스펙 §3.2). Orca 모드 = Orca 프리셋을 연결한 레이어 */
   _reevaluateMode() {
-    // 노브로 고른 레이어 (2026-10-10): 앞 앱이 그대로인 동안만. 바뀌었거나 레이어가 없어졌으면 풀린다
-    const pinned = this._pin && this._pin.front === this._front ? this.layers.find((l) => l.id === this._pin.layerId) : null;
-    if (!pinned && this._pin) { this._log(`노브로 고른 레이어 풀림 (앞 앱 ${this._front ?? '없음'})`); }
+    // 노브·상태판으로 고른 레이어: 풀 때까지 고정 (2026-10-11 사용자 결정 — 앞 앱이 바뀌어도 유지).
+    // '자동'을 고르거나 앱을 다시 시작하면(저장하지 않음) 앞 앱 따라. 고른 레이어가 없어졌으면 풀린다
+    const pinned = this._pin ? this.layers.find((l) => l.id === this._pin.layerId) : null;
+    if (!pinned && this._pin) { this._log('고정한 레이어가 없어져 앞 앱 따라'); }
     if (!pinned) this._pin = null;
     const r = pinned ? { layer: pinned, mode: pinned.preset === 'orca' ? 'orca' : 'app' }
       : resolveLayer(this.layers, this._front);   // 앞 앱을 아직 모르면 기본 레이어 (2026-10-11)
@@ -712,7 +713,8 @@ export class OutputService extends EventEmitter {
     const layer = this._layer;
     const nowKo = !layer ? '대기'
       : !this._front ? `${layer.name || '이름 없는'} 레이어 — 앞 앱 확인 전`
-      : layer ? `${layer.name || '이름 없는'} 레이어 — ${appName(this._front)} 앞${this._pin ? ' (직접 고름)' : ''}`
+      : this._pin ? `${layer.name || '이름 없는'} 레이어 — 고정 (앞 앱 따르려면 '자동')`
+      : layer ? `${layer.name || '이름 없는'} 레이어 — ${appName(this._front)} 앞`
         : `대기 — ${appName(this._front)}에 연결된 레이어 없음`;
     return {
       mode: this.mode,

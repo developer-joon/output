@@ -1,7 +1,7 @@
 /**
  * M26 — 노브 길게 눌러 레이어 고르기 (2026-10-10 사용자 요청).
  * 길게(0.5초) → 목록(자동 + 레이어들) 화면 표시 → 노브로 옮기고 → 누르면 고름. 5초 입력이 없거나 다른 키를 누르면 취소.
- * 고른 레이어는 지금 앞 앱이 그대로인 동안만 — 앞 앱이 바뀌거나 '자동'을 고르면 앞 앱 따라.
+ * 고른 레이어는 풀 때까지 고정 (2026-10-11 사용자 결정: 앱을 오갈 때마다 풀리면 불편) — '자동'을 고르거나 앱을 다시 시작하면 앞 앱 따라.
  */
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
@@ -52,31 +52,37 @@ describe('M26 / 노브로 레이어 고르기', () => {
     assert.equal(huds.at(-1).index, 0, '끝에서 처음(자동)으로');
     assert.deepEqual(ran, []);
   });
-  it('K03 누르면 고른 레이어로 — 같은 앞 앱인 동안 유지, 상태판에 (직접 고름)', async () => {
+  it('K03 누르면 고른 레이어로 고정 — 상태판에 고정과 푸는 법', async () => {
     const { s, ran } = await svc();
     await s._onIntent(hold); await s._onIntent(cw); await s._onIntent(tap);
     assert.equal(s._layer.id, 'l-m');
-    assert.match(s.view().layerLine.nowKo, /직접 고름/);
+    assert.match(s.view().layerLine.nowKo, /미디어 레이어 — 고정/);
+    assert.match(s.view().layerLine.nowKo, /자동/);
     assert.deepEqual(ran, [], '고르는 누름은 노브 누름 동작이 아니다');
     await s.watcher.tick();
     assert.equal(s._layer.id, 'l-m', '앞 앱이 그대로면 유지');
   });
-  it('K04 앞 앱이 바뀌면 다시 앞 앱 따라 (고정 풀림)', async () => {
+  it('K04 앞 앱이 바뀌어도 고정은 그대로 (2026-10-11) — 고른 레이어가 없어지면 그때 앞 앱 따라', async () => {
     const { s, st } = await svc();
     await s._onIntent(hold); await s._onIntent(cw); await s._onIntent(tap);
     st.front = 'com.apple.TextEdit';
     await s.watcher.tick();
-    assert.equal(s._layer.id, 'default');
+    assert.equal(s._layer.id, 'l-m');
     st.front = 'com.google.Chrome';
     await s.watcher.tick();
+    assert.equal(s._layer.id, 'l-m', '레이어가 연결된 앱으로 가도 고정이 이긴다');
+    assert.equal(s.view().layerLine.pinned, true);
+    s.layers = s.layers.filter((l) => l.id !== 'l-m');
+    s._reevaluateMode();
     assert.equal(s._layer.id, 'l-c');
+    assert.equal(s.view().layerLine.pinned, false);
   });
   it('K05 "자동"을 고르면 앞 앱 따라', async () => {
     const { s } = await svc();
     await s._onIntent(hold); await s._onIntent(cw); await s._onIntent(tap);
     await s._onIntent(hold); await s._onIntent(cw); await s._onIntent(tap);   // 미디어 → 자동
     assert.equal(s._layer.id, 'l-c');
-    assert.doesNotMatch(s.view().layerLine.nowKo, /직접 고름/);
+    assert.doesNotMatch(s.view().layerLine.nowKo, /고정/);
   });
   it('K06 다른 키를 누르면 취소하고 그 키는 평소대로, 5초 입력이 없으면 취소 (표시 닫힘)', async () => {
     const { s, huds, ran, pending } = await svc();
@@ -114,11 +120,11 @@ describe('M26 / LED 명령 대기 (실기 2026-10-11: 블루투스에서 응답 
 });
 
 describe('M26 / 상태판에서 레이어 고르기 (2026-10-11)', () => {
-  it('K09 pickLayer(id): 노브로 고른 것과 같다 — 같은 앞 앱인 동안 유지, null이면 자동, 모르는 id는 거절', async () => {
+  it('K09 pickLayer(id): 노브로 고른 것과 같다 — 풀 때까지 고정, null이면 자동, 모르는 id는 거절', async () => {
     const { s } = await svc();
     assert.deepEqual(s.pickLayer('l-m'), { ok: true });
     assert.equal(s._layer.id, 'l-m');
-    assert.match(s.view().layerLine.nowKo, /고름/);
+    assert.match(s.view().layerLine.nowKo, /고정/);
     assert.equal(s.view().layerLine.pinned, true);
     assert.equal(s.pickLayer('nope').ok, false);
     assert.equal(s._layer.id, 'l-m');
