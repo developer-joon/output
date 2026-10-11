@@ -27,6 +27,7 @@ npm ci
 npm test                 # 테스트 (장치·Electron 없이 돈다)
 npm run app              # 개발 실행
 npm run dist:dmg:local   # DMG — 임시(ad-hoc) 서명, 공증 없음. 인증서가 없어도 된다
+npm run dist:dmg:dev     # DMG — Developer ID 서명, 공증 없음 (이 Mac에서 만들어 이 Mac에 설치하는 테스트용 — 서명이 같아 권한 유지, 빠름)
 npm run dist:dmg         # DMG — Developer ID 서명 + 공증 (키체인의 인증서와 notarytool 프로필 `output` 필요)
 npm run release          # 서명·공증한 DMG·zip을 GitHub Releases에 올림 (버전을 올리고 커밋·푸시한 뒤, gh 로그인 필요)
 ```
