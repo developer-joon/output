@@ -193,22 +193,23 @@ const dv = { plan: null, msg: null, busy: false };
 
 /**
  * 설치 단계 4 — 장치 준비 (2026-10-11 앱 정보 개편). 따로 있던 장치 칸·백업 목록·되돌리기는 없앴다.
- * 준비된 장치면 한 줄만, 준비가 안 됐거나 어긋났을 때만 [장치 준비] → 바뀌는 내용 → [백업하고 쓰기].
+ * 준비가 안 됐거나 어긋났으면 [장치 준비], 준비됐어도 [다시 쓰기]는 늘 있다 (2026-10-11 실기: 다른 Mac에서 준비됨으로 보였는데
+ * 작업 칸 LED가 안 켜졌고, 쓸 길이 없었다) → 바뀌는 내용 → [백업하고 쓰기].
  * 백업 파일은 상태 폴더에 그대로 남고, 쓰기가 어긋나면 백업으로 자동으로 되돌린다.
  */
 function deviceStep(s, layerWarn) {
   const ready = s.connected && s.ready && !layerWarn;
   const body = !s.connected ? s.deviceStateKo
-    : ready ? '준비됨 — 장치에 Output 레이어 하나만 있습니다.'
+    : ready ? '준비됨 — 장치에 Output 레이어 하나만 있습니다. 작업 칸 LED가 안 켜지면 다시 쓰기를 누르세요 (키 1~13을 AG00~AG12로).'
       : [layerWarn?.messageKo, ...s.reasonsKo].filter(Boolean).join('\n');
-  const prep = ready || !s.connected || dv.plan ? null : h('button', { class: 'btn primary', disabled: dv.busy, onclick: async () => {
+  const prep = !s.connected || dv.plan ? null : h('button', { class: ready ? 'btn' : 'btn primary', disabled: dv.busy, onclick: async () => {
     if (dv.busy) return;
     dv.busy = true; dv.msg = null;
     dv.plan = await cb.invoke('cb:device:plan');
     dv.busy = false;
     if (!dv.plan.ok) { dv.msg = { tone: 'error', text: dv.plan.errorKo }; dv.plan = null; }
     renderAbout();
-  } }, '장치 준비');
+  } }, ready ? '다시 쓰기' : '장치 준비');
   const plan = dv.plan ? h('div', { class: 'card' },
     h('strong', {}, '바뀌는 내용'),
     h('ul', {}, [...dv.plan.changesKo, ...dv.plan.diffLines].map((l) => h('li', { class: 'mono small' }, l))),
