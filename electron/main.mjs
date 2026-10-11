@@ -341,16 +341,6 @@ function registerIpc() {
   handle('cb:device:status', () => service.deviceStatus());
   handle('cb:device:plan', () => service.devicePlan());
   handle('cb:device:apply', () => service.deviceApply());
-  handle('cb:keymap:backups', () => service.keymapBackups());
-  handle('cb:keymap:restore', async (p) => {
-    const r = await dialog.showMessageBox(settings ?? undefined, {
-      type: 'warning', buttons: ['취소', '되돌리기'], defaultId: 0, cancelId: 0,
-      message: '이 백업으로 장치 키맵을 되돌릴까요?',
-      detail: `${path.basename(p)}\n되돌리기 직전 상태도 백업해 둡니다.`,
-    });
-    if (r.response !== 1) return { ok: false, stage: 'cancel', messageKo: '취소했습니다.' };
-    return service.keymapRestore(p);
-  });
   handle('cb:diagnostics:export', async () => {
     const r = await dialog.showSaveDialog(settings ?? undefined, {
       title: '진단 내보내기', defaultPath: path.join(os.homedir(), 'Desktop', `output-diagnostics-${Date.now()}.json`),

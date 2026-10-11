@@ -27,10 +27,18 @@ describe('개선 4 / IPC 채널 드리프트', () => {
   it('I03 프리셋·장치 채널이 있고 키맵 직접 편집 채널은 없다 (2026-10-04)', () => {
     const invokeBlock = /const INVOKE = new Set\(\[([\s\S]*?)\]\);/.exec(preload)[1];
     const allowed = literals(invokeBlock, /'(cb:[\w:]+)'/g);
-    for (const c of ['cb:presets:list', 'cb:presets:copy', 'cb:layers:orcaUnlinked', 'cb:device:status', 'cb:device:plan', 'cb:device:apply', 'cb:keymap:backups', 'cb:keymap:restore']) {
+    for (const c of ['cb:presets:list', 'cb:presets:copy', 'cb:layers:orcaUnlinked', 'cb:device:status', 'cb:device:plan', 'cb:device:apply']) {
       assert.ok(allowed.has(c), c);
     }
-    for (const c of ['cb:keymap:load', 'cb:keymap:state', 'cb:keymap:edit', 'cb:keymap:apply']) assert.equal(allowed.has(c), false, c);
+    // 백업 목록·되돌리기 화면은 없앴다 (2026-10-11 앱 정보 개편). 백업 파일과 쓰기 실패 시 자동 되돌리기는 그대로
+    for (const c of ['cb:keymap:load', 'cb:keymap:state', 'cb:keymap:edit', 'cb:keymap:apply', 'cb:keymap:backups', 'cb:keymap:restore']) assert.equal(allowed.has(c), false, c);
+  });
+
+  it('I04 설정 맨 아래 메뉴는 \'앱 정보\' — 안내 문구도 같은 이름을 쓴다 (2026-10-11)', () => {
+    assert.match(read('../electron/renderer/settings.html'), /data-nav="about"[^>]*>앱 정보</);
+    for (const f of ['../electron/renderer/popover.js', '../electron/renderer/settings.html', '../src/service/outputService.js']) {
+      assert.equal(read(f).includes('정보 · 진단'), false, f);
+    }
   });
 
   it('I02 preload가 허용한 이벤트와 main이 send하는 이벤트가 같다', () => {

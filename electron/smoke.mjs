@@ -168,9 +168,10 @@ export async function smoke(c) {
     // 장치 준비 흐름: 바뀌는 내용까지만 (쓰지는 않는다)
     await js(`document.querySelector('[data-nav="about"]').click()`);
     await wait(500);
-    await js(`[...document.querySelectorAll('button')].find(b => /장치 준비|다시 쓰기/.test(b.textContent))?.click()`);
+    // 2026-10-11: 장치 칸을 없앴다 — 준비가 안 된 장치에서만 설치 단계 4에 '장치 준비'가 있다
+    await js(`[...document.querySelectorAll('button')].find(b => /장치 준비/.test(b.textContent))?.click()`);
     await wait(900);
-    await js(`document.getElementById('device-section')?.scrollIntoView()`);
+    await js(`document.querySelector('[data-step="4"]')?.scrollIntoView()`);
     await wait(200);
     await snap(c.settings, 'device-plan');
     // 프리셋: 노브 그림이 함께 보인다

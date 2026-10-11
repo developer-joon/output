@@ -4,12 +4,12 @@ import { pickKeyColor } from '../../src/apps/keyLed.js';
 import { ly, lyPresets, lyBoard, lyKnob, lyJoystick, renderLayers, openLayer } from './layers.js';
 
 /**
- * 설정 창 — 설치 마법사 · 레이어 · 프리셋 · 장치 · 정보/진단.
- * 장치 쓰기는 정보·진단의 장치 칸에서 '장치 준비' → 바뀌는 내용 확인 → '백업하고 쓰기'를 눌러야만 일어난다.
+ * 설정 창 — 레이어 · 프리셋 · 설정 · 앱 정보(설치 단계 포함).
+ * 장치 쓰기는 앱 정보 → 설치 단계 4 '장치 준비'(준비가 안 됐을 때만 보인다) → 바뀌는 내용 확인 → '백업하고 쓰기'를 눌러야만 일어난다.
  */
 const main = document.getElementById('main');
 const nav = [...document.querySelectorAll('[data-nav]')];
-// 설치 마법사와 장치는 정보·진단에 합쳤다 (2026-10-04). 'setup'·'device'로 부르면 정보·진단을 연다
+// 설치 마법사와 장치는 앱 정보에 합쳤다 (2026-10-04, 이름 2026-10-11). 'setup'·'device'로 부르면 앱 정보를 연다
 // 'layers:<id>' = 레이어 화면에서 그 레이어를 연다 (상태판의 '레이어 만들기', 2026-10-10)
 const tabOf = (t) => {
   const m = /^layers:(.+)$/.exec(t ?? '');
@@ -35,7 +35,7 @@ let lastDeviceKey = null;
 cb.on('cb:view', (v) => {
   view = v;
   // 장치·정보 화면은 장치·Orca 연결 상태가 바뀔 때만 다시 그린다 (갱신마다 그리면 깜박이고 버튼을 방해한다)
-  const key = `${v.health?.device?.state}|${v.deviceLayerKo ?? ''}|${v.health?.orca?.ok}|${v.warnings.map((w) => w.code).join(',')}`;
+  const key = `${v.health?.device?.state}|${v.deviceLayerKo ?? ''}|${v.health?.orca?.ok}|${v.warnings.map((w) => w.code).join(',')}|${v.update?.state}|${v.update?.version ?? ''}`;
   if (key !== lastDeviceKey) {
     lastDeviceKey = key;
     if (tab === 'about' && !dv.busy) renderAbout();
@@ -44,11 +44,12 @@ cb.on('cb:view', (v) => {
 
 // ───────────────────────── 설치 마법사
 
-/** 설치 단계 (정보·진단 화면 안). 각 단계는 지금 상태를 보여 준다 */
+/** 설치 단계 (앱 정보 화면 안). 각 단계는 지금 상태를 보여 준다 */
 async function setupSection() {
   view = view ?? await cb.invoke('cb:view');
   const s = await cb.invoke('cb:setup:get');
   const auto = await cb.invoke('cb:autostart:get');
+  const ds = await cb.invoke('cb:device:status');
   const dev = view.health.device;
   const orca = view.health.orca;
   const layerWarn = view.warnings.find((w) => w.code === 'layer' || w.code === 'layer-upgrade' || w.code === 'dial-hint');
@@ -71,9 +72,7 @@ async function setupSection() {
             : dev.state === 'missing' ? '장치를 찾지 못했습니다. USB나 블루투스로 연결하세요.' : `상태: ${dev.labelKo}`),
       step(3, s.calibrated ? true : false, '키 위치 보정',
         s.calibrated ? `보정 있음 — ${s.calibrationKo}` : `보정이 없습니다 (${s.calibrationKo}). 터미널에서 node tools/doctor.mjs --input 과 node tools/calibrate.mjs --apply 를 실행하세요.`),
-      step(4, layerWarn ? false : (dev.ok ? true : null), '장치 준비',
-        layerWarn ? layerWarn.messageKo : '장치에 Output 레이어 하나만 둡니다. 쓰기 전에 바뀌는 내용을 보여주고, 백업한 뒤, 다시 읽어 대조합니다.',
-        h('button', { class: 'btn', onclick: () => document.getElementById('device-section')?.scrollIntoView({ behavior: 'smooth' }) }, '아래 장치 칸으로')),
+      deviceStep(ds, layerWarn),
       step(5, orca.ok ? true : false, 'Orca',
         orca.ok ? 'Orca 연결됨. 에이전트 상태를 2초마다 읽습니다. 읽기와 터미널 전환만 합니다.'
           : 'Orca에 닿지 못했습니다. Orca를 열면 자동으로 다시 읽습니다. 그동안 슬롯은 비어 있습니다 — 모의 데이터를 넣지 않습니다.'),
@@ -188,91 +187,82 @@ function nightCard(prefs) {
     h('div', { class: 'row-flex pref-times' }, h('span', { class: 'small muted' }, '시작'), from, h('span', { class: 'small muted' }, '~ 끝'), to));
 }
 
-// ───────────────────────── 장치 (Output 레이어 하나, 프리셋·장치 스펙 §4)
+// ───────────────────────── 장치 준비 (Output 레이어 하나, 프리셋·장치 스펙 §4)
 
 const dv = { plan: null, msg: null, busy: false };
 
-function backupsEl(backups) {
-  if (!backups.length) return null;
-  return h('div', {},
-    h('div', { class: 'small muted', style: { marginBottom: '6px' } }, '백업 — 장치에 쓰기 전마다 만든 것'),
-    h('div', { class: 'logs' }, backups.slice(0, 20).map((b) => h('div', { class: 'row-flex' },
-      h('span', { class: 'grow mono' }, b.name),
-      h('button', {
-        class: 'btn', style: { minHeight: '28px', padding: '2px 10px', fontSize: '12px' },
-        onclick: async () => {
-          const r = await cb.invoke('cb:keymap:restore', b.path);
-          dv.msg = { tone: r.ok ? 'info' : (r.stage === 'cancel' ? 'info' : 'error'), text: r.messageKo };
-          dv.plan = null;
-          renderAbout();
-        },
-      }, '이것으로 되돌리기')))));
-}
-
-/** 장치 칸 (정보·진단 안, 2026-10-04): 상태 · 장치 준비 · 백업 */
-async function deviceSection() {
-  const s = await cb.invoke('cb:device:status');
-  const backups = await cb.invoke('cb:keymap:backups');
-  const state = !s.connected
-    ? h('div', { class: 'notice warn' }, s.deviceStateKo)
-    : s.ready
-      ? h('div', { class: 'notice info' }, '● Output 레이어 하나 — 준비됨')
-      : h('div', { class: 'notice warn' }, '▲ 고쳐야 함', h('ul', {}, s.reasonsKo.map((r) => h('li', {}, r))));
-  const prep = h('button', { class: 'btn primary', disabled: !s.connected || dv.busy, onclick: async () => {
+/**
+ * 설치 단계 4 — 장치 준비 (2026-10-11 앱 정보 개편). 따로 있던 장치 칸·백업 목록·되돌리기는 없앴다.
+ * 준비된 장치면 한 줄만, 준비가 안 됐거나 어긋났을 때만 [장치 준비] → 바뀌는 내용 → [백업하고 쓰기].
+ * 백업 파일은 상태 폴더에 그대로 남고, 쓰기가 어긋나면 백업으로 자동으로 되돌린다.
+ */
+function deviceStep(s, layerWarn) {
+  const ready = s.connected && s.ready && !layerWarn;
+  const body = !s.connected ? s.deviceStateKo
+    : ready ? '준비됨 — 장치에 Output 레이어 하나만 있습니다.'
+      : [layerWarn?.messageKo, ...s.reasonsKo].filter(Boolean).join('\n');
+  const prep = ready || !s.connected || dv.plan ? null : h('button', { class: 'btn primary', disabled: dv.busy, onclick: async () => {
     if (dv.busy) return;
     dv.busy = true; dv.msg = null;
     dv.plan = await cb.invoke('cb:device:plan');
     dv.busy = false;
     if (!dv.plan.ok) { dv.msg = { tone: 'error', text: dv.plan.errorKo }; dv.plan = null; }
     renderAbout();
-  } }, s.ready ? '다시 쓰기' : '장치 준비');
-  const planEl = dv.plan ? h('div', { class: 'card' },
+  } }, '장치 준비');
+  const plan = dv.plan ? h('div', { class: 'card' },
     h('strong', {}, '바뀌는 내용'),
     h('ul', {}, [...dv.plan.changesKo, ...dv.plan.diffLines].map((l) => h('li', { class: 'mono small' }, l))),
-    dv.plan.diffLines.length ? null : h('p', { class: 'muted small' }, '장치에서 바뀌는 것이 없습니다.'),
+    dv.plan.diffLines.length ? null : h('p', { class: 'muted small' }, '장치가 이미 맞습니다.'),
     h('div', { class: 'row-flex' },
       h('button', { class: 'btn', onclick: () => { dv.plan = null; renderAbout(); } }, '취소'),
-      h('button', { class: 'btn primary', disabled: dv.busy || !dv.plan.diffLines.length, onclick: async (e) => {
+      dv.plan.diffLines.length ? h('button', { class: 'btn primary', disabled: dv.busy, onclick: async (e) => {
         if (dv.busy) return;
         dv.busy = true; e.target.disabled = true;
         const r = await cb.invoke('cb:device:apply');
         dv.busy = false; dv.plan = null;
         dv.msg = r.ok ? { tone: 'info', text: `장치를 준비했습니다. 백업: ${r.backupPath}` } : { tone: 'error', text: r.messageKo };
         renderAbout();
-      } }, '백업하고 쓰기'))) : null;
-  return h('div', { class: 'device-section', id: 'device-section' },
-    h('h3', {}, '장치'),
-    dv.msg ? h('div', { class: `notice ${dv.msg.tone}` }, dv.msg.text) : null,
-    state, h('p', { class: 'small muted' }, '레이어는 장치에 쓰지 않습니다. 레이어 화면에서 저장하면 바로 반영됩니다.'),
-    h('div', { class: 'row-flex' }, prep), planEl, backupsEl(backups));
+      } }, '백업하고 쓰기') : null)) : null;
+  const msg = dv.msg ? h('div', { class: `notice ${dv.msg.tone}` }, dv.msg.text) : null;
+  return h('div', { class: `step ${ready ? 'done' : s.connected ? 'todo' : ''}`, dataset: { step: '4' } },
+    h('span', { class: 'num' }, ready ? '✓' : 4),
+    h('div', { class: 'grow' }, h('h3', {}, '장치 준비'), h('p', {}, body),
+      prep || plan || msg ? h('div', { class: 'btns', style: { flexDirection: 'column', alignItems: 'stretch' } }, msg, prep ? h('div', {}, prep) : null, plan) : null));
 }
 
-// ───────────────────────── 정보 · 진단
+// ───────────────────────── 앱 정보 (2026-10-11: 정보 · 진단 → 앱 정보, 장치 칸 없앰)
+
+function updateLine(u) {
+  if (!u || u.state === 'off') return h('span', { class: 'muted small' }, '자동 업데이트: 개발 실행이라 꺼짐');
+  if (u.state === 'ready') {
+    return h('span', { class: 'row-flex' }, h('span', {}, `새 버전 ${u.version} 준비됨`),
+      h('button', { class: 'btn primary', onclick: () => cb.invoke('cb:update:install') }, '다시 시작해서 업데이트'));
+  }
+  if (u.state === 'downloading') return h('span', { class: 'muted small' }, `새 버전 ${u.version ?? ''} 받는 중`);
+  return h('span', { class: 'muted small' }, '최신 버전 · 6시간마다 확인');
+}
 
 async function renderAbout() {
   const info = await cb.invoke('cb:info');
   const logs = await cb.invoke('cb:logs');
-  const auto = await cb.invoke('cb:autostart:get');
+  view = view ?? await cb.invoke('cb:view');
   let note = h('span', { class: 'small muted' }, '');
   const setup = await setupSection();
-  const device = await deviceSection();
-  mount(main, panel('정보 · 진단', [
-    '설치 단계: 각 단계가 지금 상태를 보여 줍니다. 표시된 단계만 하면 됩니다.',
-    '장치: 장치 준비를 누르면 바뀌는 내용이 나옵니다. 확인하고 백업하고 쓰기를 누르세요. 쓰기는 백업 → 쓰기 → 다시 읽어 확인 순서이고, 백업 목록에서 이전 상태로 되돌릴 수 있습니다. 펌웨어 업데이트만 Input 앱으로 하세요.',
+  mount(main, panel('앱 정보', [
+    '버전: 새 버전이 나오면 자동으로 받아 두고 알려 줍니다. 다시 시작해서 업데이트를 누를 때 바뀝니다.',
+    '설치 단계: 각 단계가 지금 상태를 보여 줍니다. 표시된 단계만 하면 됩니다. 장치 준비는 준비가 안 됐을 때만 버튼이 나옵니다 (새 장치, 펌웨어 업데이트 뒤). 펌웨어 업데이트만 Input 앱으로 하세요.',
     '진단 내보내기: 문제를 알릴 때 이 파일을 붙여 주세요. 작업 이름·경로·대화 내용은 들어가지 않습니다.',
     '상태 폴더 열기: 설정·백업·로그가 있는 폴더를 엽니다.',
   ],
+    h('div', { class: 'card app-card' },
+      h('div', { class: 'row-flex' }, h('strong', { class: 'grow', style: { fontSize: '17px' } }, `Output ${info.versions.app ?? ''}`), updateLine(view?.update)),
+      h('div', { class: 'small muted' }, `펌웨어 ${info.versions.firmware ?? '—'} · 상태 폴더 ${info.stateDir}`),
+      h('div', { class: 'row-flex' },
+        h('button', { class: 'btn', onclick: () => cb.invoke('cb:openStateDir') }, '상태 폴더 열기'),
+        h('button', { class: 'btn', onclick: async () => { const r = await cb.invoke('cb:diagnostics:export'); note.textContent = r.messageKo; } }, '진단 내보내기'),
+        note)),
     setup,
-    device,
-    h('div', { class: 'grid4' },
-      h('div', { class: 'card' }, h('label', {}, '앱'), h('b', {}, info.versions.app ?? '—')),
-      h('div', { class: 'card' }, h('label', {}, '펌웨어'), h('b', {}, info.versions.firmware ?? '—')),
-      h('div', { class: 'card' }, h('label', {}, '로그인 시 시작'), h('b', {}, auto.openAtLogin ? '켜짐' : '꺼짐'))),
-    h('div', { class: 'row-flex' },
-      h('button', { class: 'btn primary', onclick: async () => { const r = await cb.invoke('cb:diagnostics:export'); note.textContent = r.messageKo; } }, '진단 내보내기'),
-      h('button', { class: 'btn', onclick: () => cb.invoke('cb:openStateDir') }, '상태 폴더 열기'),
-      note),
-    h('div', { class: 'small muted' }, `상태 폴더: ${info.stateDir}`),
+    h('h3', {}, '최근 기록'),
     h('div', { class: 'logs' }, logs.length ? logs.slice().reverse().map((l) => h('div', {}, `${new Date(l.at).toLocaleTimeString('ko-KR')}  ${l.messageKo}`)) : h('div', { class: 'muted' }, '기록 없음'))));
 }
 

@@ -57,9 +57,9 @@ function warningEl(w) {
     : w.action === 'open-accessibility'
       ? h('button', { onclick: () => cb.invoke('cb:openPermission', 'accessibility') }, '손쉬운 사용 열기')
       : w.action === 'open-device'
-        ? h('button', { onclick: () => cb.invoke('cb:openSettings', 'about') }, '정보 · 진단')
+        ? h('button', { onclick: () => cb.invoke('cb:openSettings', 'about') }, '앱 정보')
       : w.action === 'open-setup'
-        ? h('button', { onclick: () => cb.invoke('cb:openSettings', 'about') }, '정보 · 진단')
+        ? h('button', { onclick: () => cb.invoke('cb:openSettings', 'about') }, '앱 정보')
         : null;
   const tone = w.level === 'error' ? 'error' : w.level === 'info' ? 'info' : 'warn';
   return h('div', { class: `notice ${tone}`, dataset: { warning: w.code } }, w.messageKo, action);

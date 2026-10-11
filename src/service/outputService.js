@@ -404,7 +404,7 @@ export class OutputService extends EventEmitter {
         const encClick = layer?.layout?.encoders?.[0]?.[2];
         const clickCode = encClick && typeof encClick === 'object' ? encClick.keycode : encClick;
         this.deviceInfo.dialHintKo = /^KI_LS\d$/.test(String(clickCode ?? ''))
-          ? '노브 누름이 아직 하드웨어 레이어 전환 키입니다. 설정 → 정보 · 진단 → 장치 → 장치 준비를 실행하면 노브 누름에 레이어마다 동작을 넣을 수 있습니다.'
+          ? '노브 누름이 아직 하드웨어 레이어 전환 키입니다. 설정 → 앱 정보 → 장치 준비를 실행하면 노브 누름에 레이어마다 동작을 넣을 수 있습니다.'
           : null;
       }
       this.driver.restoreColor = restoreColorOf(this.deviceInfo.layerColor);
@@ -667,7 +667,7 @@ export class OutputService extends EventEmitter {
     if (this.transport && this.deviceInfo.layerIsOutput === false) {
       v.warnings.unshift({
         code: 'layer', level: 'warn', action: 'open-device',
-        messageKo: `지금 장치 레이어가 '${this.deviceInfo.layerName ?? '알 수 없음'}'입니다. 설정 → 정보 · 진단 → 장치 → 장치 준비를 실행하면 Output 레이어 하나로 맞춥니다.`,
+        messageKo: `지금 장치 레이어가 '${this.deviceInfo.layerName ?? '알 수 없음'}'입니다. 설정 → 앱 정보 → 장치 준비를 실행하면 Output 레이어 하나로 맞춥니다.`,
       });
     }
     if (this.transport && this.deviceInfo.layerIsOutput === true && this.deviceInfo.layerNeedsUpgrade === true) {
@@ -675,8 +675,8 @@ export class OutputService extends EventEmitter {
       v.warnings.unshift({
         code: 'layer-upgrade', level: 'warn', action: 'open-device',
         messageKo: OUR_LAYERS.includes(this.deviceInfo.layerName)
-          ? '지금 레이어에 옛 키코드(ACT)가 있어 아래 7키 LED가 켜지지 않습니다. 설정 → 정보 · 진단 → 장치 → 장치 준비를 실행하세요.'
-          : `지금 장치 레이어 '${this.deviceInfo.layerName ?? '알 수 없음'}'는 Output 레이어가 아니어서 아래 7키 LED가 켜지지 않습니다. 설정 → 정보 · 진단 → 장치 → 장치 준비를 실행하면 Output 레이어 하나로 맞춥니다.`,
+          ? '지금 레이어에 옛 키코드(ACT)가 있어 아래 7키 LED가 켜지지 않습니다. 설정 → 앱 정보 → 장치 준비를 실행하세요.'
+          : `지금 장치 레이어 '${this.deviceInfo.layerName ?? '알 수 없음'}'는 Output 레이어가 아니어서 아래 7키 LED가 켜지지 않습니다. 설정 → 앱 정보 → 장치 준비를 실행하면 Output 레이어 하나로 맞춥니다.`,
       });
     }
     v.lastEventKo = this.lastEventKo;
