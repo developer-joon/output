@@ -42,6 +42,22 @@ export function isDefaultBranchWorkspace(w) {
   return typeof w.branch === 'string' && w.branch.trim() !== '';
 }
 
+/**
+ * `worktree ps`·`terminal list`의 worktreeId → `worktree list`의 id.
+ * 같은 경로인데 두 쪽 id가 다른 작업이 있다 (실기 2026-10-12 다른 Mac, 9개 중 3개). 그대로 두면
+ * 탭도 상태도 붙지 않아 '상태 모름'이 된다. 목록에 없는 id만, 같은 경로의 작업이 하나일 때만 잇는다.
+ */
+export function worktreeIdAliases(listWorktrees = [], psResult = {}) {
+  const ids = new Set(listWorktrees.map((w) => w.id));
+  const aliases = new Map();
+  for (const p of psResult?.worktrees ?? []) {
+    if (!p.worktreeId || ids.has(p.worktreeId) || !p.path) continue;
+    const same = listWorktrees.filter((w) => w.path === p.path);
+    if (same.length === 1) aliases.set(p.worktreeId, same[0].id);
+  }
+  return aliases;
+}
+
 /** terminal.agentIdentity 가 있으면 agent child로 본다. */
 export function roleOfTerminal(t) {
   return t.agentIdentity ? ChildRole.AGENT : ChildRole.TERMINAL;
@@ -167,12 +183,15 @@ export class OrcaAdapter {
       this.cli.run(READ_COMMANDS.worktreePs).catch((e) => { psError = e; return null; }),
     ]);
     if (needLists) this._lists = { wres, tres };
-    else if (psres) {
+    const aliases = psres ? worktreeIdAliases(wres?.worktrees ?? [], psres) : new Map();
+    this._aliases = aliases;
+    const listId = (id) => aliases.get(id) ?? id;
+    if (!needLists && psres) {
       const known = new Set((wres?.worktrees ?? []).map((w) => w.id));
-      if ([...indexPsWorktrees(psres).keys()].some((id) => !known.has(id))) return this.list({ full: true });
+      if ([...indexPsWorktrees(psres).keys()].some((id) => !known.has(listId(id)))) return this.list({ full: true });
     }
     const agentsByPane = psres ? indexAgentsByPaneKey(psres) : new Map();
-    const psByWorktree = psres ? indexPsWorktrees(psres) : new Map();
+    const psByWorktree = new Map([...(psres ? indexPsWorktrees(psres) : new Map())].map(([id, w]) => [listId(id), w]));
     for (const w of psByWorktree.values()) {
       if (w.status && !KNOWN_PS_STATUSES.includes(w.status)) this.unknownPsStatuses.add(w.status);
     }
@@ -190,8 +209,9 @@ export class OrcaAdapter {
 
     const byWorktree = new Map();
     for (const t of terminals) {
-      if (!byWorktree.has(t.worktreeId)) byWorktree.set(t.worktreeId, []);
-      byWorktree.get(t.worktreeId).push(t);
+      const id = listId(t.worktreeId);
+      if (!byWorktree.has(id)) byWorktree.set(id, []);
+      byWorktree.get(id).push(t);
     }
 
     const units = worktrees
@@ -271,7 +291,7 @@ export class OrcaAdapter {
   /** 핸들이 아직 살아 있는지 확인하고, 아니면 같은 자리를 다시 찾는다. */
   async resolveHandle({ handle, worktreeId, tabId, leafId }) {
     const r = await this.cli.run(READ_COMMANDS.terminalList);
-    const terminals = r?.terminals ?? [];
+    const terminals = (r?.terminals ?? []).map((t) => ({ ...t, worktreeId: this._aliases?.get(t.worktreeId) ?? t.worktreeId }));
     const alive = terminals.find((t) => t.handle === handle && !t.orphaned);
     if (alive) return { handle, recovered: false, reasonKo: '' };
 
