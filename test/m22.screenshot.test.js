@@ -15,6 +15,11 @@ describe('M22 / 화면 캡처 동작', () => {
   it('C01 저장 형식: 모니터(주·2~4)와 저장 위치(데스크탑·클립보드·둘 다), 모르는 값은 기본(주 모니터·데스크탑)', () => {
     assert.deepEqual(normalizeAction({ type: 'screenshot', label: '', display: 2, save: 'clipboard' }), { type: 'screenshot', label: '', display: 2, save: 'clipboard' });
     assert.deepEqual(normalizeAction({ type: 'screenshot', display: 9, save: 'x' }), { type: 'screenshot', label: '', display: 'main', save: 'desktop' });
+    // 세 동작 모두 같은 번호 (2026-10-12): 1 = 주 모니터('main'), 2~6
+    assert.equal(normalizeAction({ type: 'screenshot', display: 6 }).display, 6);
+    assert.equal(normalizeAction({ type: 'moveWindow', position: 'left', display: 1 }).display, 'main');
+    assert.equal(normalizeAction({ type: 'moveWindow', position: 'left', display: 3 }).display, 3);
+    assert.equal(normalizeAction({ type: 'layout', items: [{ display: 7 }] }).items[0].display, 'main');
     const errs = [];
     checkAction('key1', normalizeAction({ type: 'screenshot', display: 3, save: 'both' }), 'L', errs);
     assert.deepEqual(errs, [], '이름이 없어도 된다 (자동 이름)');

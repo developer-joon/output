@@ -26,10 +26,23 @@ export function rectFor(position, wa) {
   return { x, y, width: right - x, height: bottom - y };
 }
 
-/** @returns {object|null} 작업 영역. 화면 정보가 없으면 null */
-export function pickDisplay(displays, display) {
+/** 모니터를 이만큼까지 번호로 고를 수 있다 */
+export const MAX_DISPLAYS = 6;
+
+/**
+ * 모니터 번호 (2026-10-12): 1 = 주 모니터(메뉴 막대가 있는 화면), 나머지는 시스템이 주는 순서.
+ * 화면 캡처(screencapture -D)와 같은 번호라 세 동작(캡처·앞 창 위치·레이아웃)이 같은 모니터를 가리킨다.
+ */
+export function numberDisplays(displays = []) {
   const primary = displays.find((d) => d.primary) ?? displays[0];
-  if (!primary) return null;
-  if (display === 'main' || !Number.isInteger(display)) return primary.workArea;
-  return (displays[display - 1] ?? primary).workArea;
+  if (!primary) return [];
+  return [primary, ...displays.filter((d) => d !== primary)].map((d, i) => ({ ...d, n: i + 1 }));
+}
+
+/** @returns {object|null} 작업 영역. 화면 정보가 없으면 null, 없는 번호는 주 모니터 */
+export function pickDisplay(displays, display) {
+  const list = numberDisplays(displays);
+  if (!list.length) return null;
+  const n = display === 'main' ? 1 : display;
+  return (list.find((d) => d.n === n) ?? list[0]).workArea;
 }

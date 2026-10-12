@@ -29,6 +29,7 @@ import { appMenuTemplate } from './appMenu.mjs';
 import { appendLog } from '../src/service/logFile.js';
 import { smoke } from './smoke.mjs';
 import { createUpdater } from './updater.mjs';
+import { numberDisplays } from '../src/apps/windowLayout.js';
 import {
   frontmostBundleId, isProcessRunning, synthKeystroke, openSettings,
   openApp, openUrl, execCommand, readClipboard, writeClipboard, moveWindow, hasWindow, screenshot,
@@ -123,10 +124,7 @@ function createService() {
     versions: { app: app.getVersion() },
     // 앱별 키 (2026-10-03): 실행부와 창 위치용 화면 목록
     appExec: { synth: synthKeystroke, openApp, openUrl, execCommand, readClipboard, writeClipboard, moveWindow, hasWindow, screenshot },
-    displays: () => {
-      const primaryId = screen.getPrimaryDisplay().id;
-      return screen.getAllDisplays().map((d) => ({ id: d.id, primary: d.id === primaryId, workArea: d.workArea }));
-    },
+    displays: allDisplays,
   });
   svc.calibrationSourceKo = cal.sourceKo;
   svc.on('update', schedulePush);
@@ -276,8 +274,18 @@ function handle(channel, fn) {
   });
 }
 
+/** 연결된 모니터 (2026-10-12): 이름(label)은 설정 화면 목록용 */
+function allDisplays() {
+  const primaryId = screen.getPrimaryDisplay().id;
+  return screen.getAllDisplays().map((d) => ({ id: d.id, primary: d.id === primaryId, label: d.label || '', workArea: d.workArea }));
+}
+
+/** 설정 화면 모니터 목록: 번호와 이름만 */
+const displayList = () => numberDisplays(allDisplays()).map((d) => ({ n: d.n, label: d.label }));
+
 function registerIpc() {
   handle('cb:view', () => currentView());
+  handle('cb:displays', () => displayList());
   // 설정 메뉴 (2026-10-10): 노브·조이스틱 화면 표시 켜기·끄기
   handle('cb:prefs:get', () => service.prefsGet());
   handle('cb:prefs:set', (p) => service.prefsSet(p));
@@ -410,6 +418,11 @@ async function main() {
   }
   createPopover();
   trace('main: popover 생성됨');
+
+  // 모니터를 꽂거나 빼면 설정 화면의 모니터 목록을 바로 바꾼다 (2026-10-12)
+  const sendDisplays = () => { if (settings && !settings.isDestroyed()) settings.webContents.send('cb:displays', displayList()); };
+  screen.on('display-added', sendDisplays);
+  screen.on('display-removed', sendDisplays);
 
   powerMonitor.on('suspend', () => service.suspend());
   powerMonitor.on('resume', () => { if (!paused) service.resume(); });

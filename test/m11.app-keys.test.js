@@ -4,7 +4,7 @@
  */
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { POSITIONS, rectFor, pickDisplay } from '../src/apps/windowLayout.js';
+import { POSITIONS, rectFor, pickDisplay, numberDisplays } from '../src/apps/windowLayout.js';
 import { buildDeviceScene } from '../src/device/deviceScene.js';
 import { colorToInt } from '../src/device/deviceDriver.js';
 import { buildStatusView } from '../src/service/uiModel.js';
@@ -40,12 +40,13 @@ describe('M11 / 창 위치', () => {
     assert.deepEqual(rectFor('center', WA), { x: 288, y: 200, width: 864, height: 525 });
     assert.deepEqual(rectFor('nope', WA), WA);
   });
-  it('W05 화면 고르기: main은 기본 화면, 없는 번호는 기본 화면', () => {
-    const ds = [{ id: 7, primary: false, workArea: { x: 1440, y: 0, width: 1920, height: 1080 } }, { id: 1, primary: true, workArea: WA }];
+  it('W05 모니터 고르기 (2026-10-12): 1 = 주 모니터, 나머지는 시스템 순서 — 화면 캡처와 같은 번호. 없는 번호는 주 모니터', () => {
+    const ds = [{ id: 7, primary: false, label: 'DELL', workArea: { x: 1440, y: 0, width: 1920, height: 1080 } }, { id: 1, primary: true, label: '내장', workArea: WA }];
     assert.deepEqual(pickDisplay(ds, 'main'), WA);
-    assert.deepEqual(pickDisplay(ds, 2), ds[1].workArea, '번호는 목록 순서(1부터)');
-    assert.deepEqual(pickDisplay(ds, 1), ds[0].workArea);
+    assert.deepEqual(pickDisplay(ds, 1), WA, '1은 목록 순서가 아니라 주 모니터');
+    assert.deepEqual(pickDisplay(ds, 2), ds[0].workArea);
     assert.deepEqual(pickDisplay(ds, 9), WA);
+    assert.deepEqual(numberDisplays(ds).map((d) => [d.n, d.label]), [[1, '내장'], [2, 'DELL']]);
     assert.equal(pickDisplay([], 'main'), null, '화면 정보가 없으면 null');
   });
 });

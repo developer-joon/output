@@ -59,9 +59,6 @@ const LY_TYPES = [
   ['openUrl', 'URL 열기'], ['insertText', '글자 입력'], ['exec', '명령 실행'], ['moveWindow', '앞 창 위치'], ['layout', '레이아웃 (여러 앱 배치)'], ['screenshot', '화면 캡처 (모니터 선택)'],
 ];
 const LY_POSITIONS = Object.entries(POSITION_LABEL);
-const LY_DISPLAYS = [['main', '기본 화면'], [1, '화면 1'], [2, '화면 2'], [3, '화면 3']];
-/** 화면 캡처 (2026-10-10): screencapture 번호 — 1 = 주 모니터(메뉴 막대가 있는 화면) */
-const LY_SHOT_DISPLAYS = [['main', '주 모니터 (1)'], [2, '모니터 2'], [3, '모니터 3'], [4, '모니터 4']];
 const LY_SHOT_SAVES = [['desktop', '파일 (스크린샷 저장 위치)'], ['clipboard', '클립보드'], ['both', '파일 + 클립보드']];
 const LY_DIR_LABEL = DIR_LABEL;
 const lyDirs = dirsOf;
@@ -74,6 +71,21 @@ const lySel = (options, value, onchange, label) => {
   return sel;
 };
 const lyDisplay = (v) => (v === 'main' ? 'main' : Number(v));
+/**
+ * 모니터 목록 (2026-10-12 사용자 요청: 고정 1~4가 아니라 연결된 모니터). 캡처·앞 창 위치·레이아웃 같은 이름·번호
+ * (1 = 주 모니터, 나머지는 시스템 순서 = 화면 캡처 번호). 저장된 모니터가 지금 없으면 '연결 안 됨'으로 남겨 설정을 잃지 않는다
+ */
+function lyDisplaySel(cur, onPick, label) {
+  const list = ly.displays ?? [];
+  const name = (d) => `${d.n === 1 ? '주 모니터' : `모니터 ${d.n}`}${d.label ? ` · ${d.label}` : ''}`;
+  const opts = list.length ? list.map((d) => [d.n === 1 ? 'main' : d.n, name(d)]) : [['main', '주 모니터']];
+  if (cur !== 'main' && !list.some((d) => d.n === cur)) opts.push([cur, `모니터 ${cur} (지금 연결 안 됨)`]);
+  const sel = lySel(opts, cur, (v) => onPick(lyDisplay(v)), label);
+  sel.dataset.displaySelect = '';
+  return sel;
+}
+// 모니터를 꽂거나 빼면 목록을 바로 바꾼다 (모니터 칸이 보일 때만 다시 그린다)
+cb.on('cb:displays', (d) => { ly.displays = d; if (document.querySelector('[data-display-select]')) renderLayers(); });
 
 /** 칸 id ↔ 레이어 경로 (keys / dial / joystick.short) */
 function lyGet(layer, id) {
@@ -274,21 +286,21 @@ function lyEditor(layer, slotId) {
       break;
     case 'moveWindow':
       body.push(h('label', {}, '위치'), lySel(LY_POSITIONS, a.position, (v) => { a.position = v; }, '위치'),
-        h('label', {}, '화면'), lySel(LY_DISPLAYS, a.display, (v) => { a.display = lyDisplay(v); }, '화면'));
+        h('label', {}, '모니터'), lyDisplaySel(a.display, (v) => { a.display = v; }, '모니터'));
       break;
     case 'screenshot':
-      body.push(h('label', {}, '모니터'), lySel(LY_SHOT_DISPLAYS, a.display, (v) => { a.display = v === 'main' ? 'main' : Number(v); }, '캡처할 모니터'),
+      body.push(h('label', {}, '모니터'), lyDisplaySel(a.display, (v) => { a.display = v; }, '캡처할 모니터'),
         h('label', {}, '저장'), lySel(LY_SHOT_SAVES, a.save, (v) => { a.save = v; }, '캡처 저장'),
-        h('div', { class: 'small muted' }, '모니터 번호는 macOS 순서입니다 (1 = 메뉴 막대가 있는 주 모니터). 처음 찍을 때 화면 기록 권한을 묻습니다.'));
+        h('div', { class: 'small muted' }, '지금 연결된 모니터가 보입니다 (주 모니터 = 메뉴 막대가 있는 화면). 처음 찍을 때 화면 기록 권한을 묻습니다.'));
       break;
     case 'layout':
-      body.push(h('label', {}, '앱 · 위치 · 화면 (아래 앱일수록 나중에 열리고 마지막 앱이 앞에 옴)'));
+      body.push(h('label', {}, '앱 · 위치 · 모니터 (아래 앱일수록 나중에 열리고 마지막 앱이 앞에 옴)'));
       a.items.forEach((it, i) => {
         body.push(h('div', { class: 'card' },
           lyAppPicker(it, (p) => { it.bundleId = p.bundleId; it.appName = p.name; renderLayers(); }),
           h('div', { class: 'row-flex' },
             lySel(LY_POSITIONS, it.position, (v) => { it.position = v; }, `${i + 1}번째 위치`),
-            lySel(LY_DISPLAYS, it.display, (v) => { it.display = lyDisplay(v); }, `${i + 1}번째 화면`),
+            lyDisplaySel(it.display, (v) => { it.display = v; }, `${i + 1}번째 모니터`),
             h('button', { class: 'btn', disabled: i === 0, onclick: () => { a.items.splice(i - 1, 0, a.items.splice(i, 1)[0]); renderLayers(); } }, '↑'),
             h('button', { class: 'btn', onclick: () => { a.items.splice(i, 1); renderLayers(); } }, '삭제'))));
       });
@@ -553,6 +565,7 @@ export async function renderLayers() {
   if (!ly.data.some((l) => l.id === ly.sel)) { ly.sel = ly.data[0]?.id ?? 'default'; ly.slot = null; }
   lyPresets.list ??= await cb.invoke('cb:presets:list');
   ly.usage = await cb.invoke('cb:usage:get').catch(() => ({}));   // 오늘 키별 사용 횟수 (2026-10-10)
+  ly.displays = await cb.invoke('cb:displays').catch(() => ly.displays ?? []);   // 연결된 모니터 (2026-10-12)
   await lyApps();
   const orcaUnlinked = await cb.invoke('cb:layers:orcaUnlinked');
   const layer = lyLayer();

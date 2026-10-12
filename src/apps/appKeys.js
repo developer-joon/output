@@ -1,5 +1,5 @@
 import { parseKeystroke } from '../service/profiles.js';
-import { POSITIONS } from './windowLayout.js';
+import { POSITIONS, MAX_DISPLAYS } from './windowLayout.js';
 import { normalizeLed } from './keyLed.js';
 import { autoLabel } from './actionLabel.js';
 
@@ -14,10 +14,10 @@ export const BUILTIN_LABEL = Object.freeze({ attention: 'ATTENTION', next_unseen
 const BUNDLE_RE = /^[A-Za-z0-9.-]+$/;
 
 const str = (v) => (typeof v === 'string' ? v : '');
-const display = (v) => (Number.isInteger(v) && v >= 1 ? v : 'main');
-/** 화면 캡처 (2026-10-10): 모니터 2~4 (1 = 주 모니터는 'main'), 저장 위치 */
+/** 모니터 번호 (2026-10-12, 캡처·앞 창 위치·레이아웃 공통): 'main' = 1 = 주 모니터, 2~MAX_DISPLAYS. 나머지는 주 모니터 */
+const display = (v) => (Number.isInteger(v) && v >= 2 && v <= MAX_DISPLAYS ? v : 'main');
+/** 화면 캡처 (2026-10-10): 저장 위치 */
 export const SCREENSHOT_SAVES = Object.freeze(['desktop', 'clipboard', 'both']);
-const shotDisplay = (v) => ([2, 3, 4].includes(v) ? v : 'main');
 
 /** 칸 하나 정리. 모르는 type은 null (버림). LED 설정(led)은 있을 때만 붙인다 (2026-10-04) */
 export function normalizeAction(a) {
@@ -39,7 +39,7 @@ function normalizeActionCore(a) {
     case 'insertText': return { ...base, text: str(a.text) };
     case 'exec': return { ...base, command: str(a.command) };
     case 'moveWindow': return { ...base, position: str(a.position), display: display(a.display) };
-    case 'screenshot': return { ...base, display: shotDisplay(a.display), save: SCREENSHOT_SAVES.includes(a.save) ? a.save : 'desktop' };
+    case 'screenshot': return { ...base, display: display(a.display), save: SCREENSHOT_SAVES.includes(a.save) ? a.save : 'desktop' };
     case 'layout': return { ...base, items: (Array.isArray(a.items) ? a.items : []).map((i) => ({ bundleId: str(i?.bundleId), appName: str(i?.appName), position: str(i?.position), display: display(i?.display) })) };
     case 'builtin': return BUILTIN_NAMES.includes(a.builtin) ? { type: 'builtin', builtin: a.builtin, label: base.label || BUILTIN_LABEL[a.builtin] } : null;
     default: return null;
