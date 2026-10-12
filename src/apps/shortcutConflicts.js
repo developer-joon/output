@@ -20,7 +20,6 @@ function slotName(id) {
   if (id === 'dial_cw') return '노브 ↻ 돌림';
   if (id === 'dial_ccw') return '노브 ↺ 돌림';
   if (id === 'dial_press') return '노브 누름';
-  if ((m = /^joystickHold_(.+)$/.exec(id))) return `조이스틱 ${ARROW[m[1]] ?? m[1]} 길게`;
   if ((m = /^joystick_(.+)$/.exec(id))) return `조이스틱 ${ARROW[m[1]] ?? m[1]}`;
   return id;
 }

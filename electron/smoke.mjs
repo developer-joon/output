@@ -187,13 +187,13 @@ export async function smoke(c) {
     await js(`document.querySelector('[aria-label="조이스틱 설정 열기"]')?.click()`);
     await wait(300);
     await snap(c.settings, 'presets-orca-joystick');
-    // 노브·조이스틱 화면 표시 (2026-10-10): 조이스틱 위로 기울임(길게 칸 있음) · 노브 돌림, 설정 메뉴
+    // 노브·조이스틱 화면 표시 (2026-10-10): 조이스틱 위로 기울임(유지해야 입력 0.5초 중 절반) · 노브 돌림, 설정 메뉴
     {
       const { joystickHud } = await import('../src/service/hudModel.js');
       const S4 = [{ direction: 'right', from: 0.875, to: 0.125 }, { direction: 'down', from: 0.125, to: 0.375 }, { direction: 'left', from: 0.375, to: 0.625 }, { direction: 'up', from: 0.625, to: 0.875 }];
       const sc2 = (label) => ({ type: 'shortcut', label, keystroke: 'cmd+k' });
-      const slots = { joystick_up: sc2('다음 탭'), joystickHold_up: sc2('새 창'), joystick_left: sc2('뒤로'), joystick_right: sc2('앞으로') };
-      c.service.emit('hud', { ...joystickHud({ angle: 0.72, distance: 0.85, dir: 'up', sectors: S4, deadzone: 0.05, holdMs: 500, holdDirs: ['up'], slots, enteredAt: 0 }), heldMs: 250 });
+      const slots = { joystick_up: sc2('다음 탭'), joystick_left: sc2('뒤로'), joystick_right: sc2('앞으로') };
+      c.service.emit('hud', { ...joystickHud({ angle: 0.72, distance: 0.85, dir: 'up', sectors: S4, deadzone: 0.05, dwellMs: 500, slots, enteredAt: 0 }), heldMs: 250 });
       await wait(700);
       fs.writeFileSync(path.join(dir, 'hud-joystick.png'), (await c.hudWin.window().webContents.capturePage()).toPNG());
       c.service.emit('hud', { kind: 'dial', action: 'cw', label: '다음 탭' });

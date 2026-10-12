@@ -6,18 +6,18 @@ import { actionLabel } from '../apps/actionLabel.js';
  */
 const nameOf = (a) => (a ? actionLabel(a) : null);
 
-/** 조이스틱: 지금 위치(장치 각도 규약 right=0, down=0.25)와 디코더가 쓰는 구간 그대로, 칸마다 짧게·길게 동작 이름 */
-export function joystickHud({ angle, distance, dir, sectors, deadzone, holdMs, holdDirs, slots, enteredAt }) {
+/** 조이스틱: 지금 위치(장치 각도 규약 right=0, down=0.25)와 디코더가 쓰는 구간 그대로, 칸마다 동작 이름.
+ *  dwellMs > 0이면 그만큼 유지해야 입력된다 (2026-10-12) — 화면이 차오르는 고리로 보여 준다 */
+export function joystickHud({ angle, distance, dir, sectors, deadzone, dwellMs = 0, slots, enteredAt }) {
   return {
     kind: 'joystick',
     angle, distance, dir, deadzone,
     sectors: (sectors ?? []).map((s) => {
       const d = s.direction ?? s.dir;
-      return { direction: d, from: s.from, to: s.to, short: nameOf(slots[`joystick_${d}`]), long: nameOf(slots[`joystickHold_${d}`]) };
+      return { direction: d, from: s.from, to: s.to, label: nameOf(slots[`joystick_${d}`]) };
     }),
-    hold: Boolean(dir && holdDirs.includes(dir)),
     enteredAt: dir ? enteredAt : null,
-    holdMs,
+    dwellMs,
   };
 }
 

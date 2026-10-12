@@ -66,7 +66,7 @@ const LY_SHOT_SAVES = [['desktop', '파일 (스크린샷 저장 위치)'], ['cli
 const LY_DIR_LABEL = DIR_LABEL;
 const lyDirs = dirsOf;
 
-export const ly = { data: null, sel: 'l-orca', slot: null, widget: null, joyLong: false, running: null, errors: [], msg: null };
+export const ly = { data: null, sel: 'l-orca', slot: null, widget: null, running: null, errors: [], msg: null };
 const lyLayer = () => ly.data.find((l) => l.id === ly.sel) ?? ly.data[0];
 const lySel = (options, value, onchange, label) => {
   const sel = h('select', { 'aria-label': label, onchange: () => onchange(sel.value) },
@@ -75,18 +75,16 @@ const lySel = (options, value, onchange, label) => {
 };
 const lyDisplay = (v) => (v === 'main' ? 'main' : Number(v));
 
-/** 칸 id ↔ 레이어 경로 (keys / dial / joystick.short·long) */
+/** 칸 id ↔ 레이어 경로 (keys / dial / joystick.short) */
 function lyGet(layer, id) {
   let m;
   if ((m = /^dial_(cw|ccw|press)$/.exec(id))) return layer.dial[m[1]] ?? null;
-  if ((m = /^joystickHold_(.+)$/.exec(id))) return layer.joystick.long[m[1]] ?? null;
   if ((m = /^joystick_(.+)$/.exec(id))) return layer.joystick.short[m[1]] ?? null;
   return layer.keys[id] ?? null;
 }
 function lySet(layer, id, action) {
   let m; let bag; let key;
   if ((m = /^dial_(cw|ccw|press)$/.exec(id))) { bag = layer.dial; key = m[1]; }
-  else if ((m = /^joystickHold_(.+)$/.exec(id))) { bag = layer.joystick.long; key = m[1]; }
   else if ((m = /^joystick_(.+)$/.exec(id))) { bag = layer.joystick.short; key = m[1]; }
   else { bag = layer.keys; key = id; }
   if (action) bag[key] = action; else delete bag[key];
@@ -96,8 +94,8 @@ function lySlotName(id) {
   if (id === 'dial_cw') return '노브 시계 방향 ↻';
   if (id === 'dial_ccw') return '노브 반시계 방향 ↺';
   if (id === 'dial_press') return '노브 누름';
-  const m = /^(joystickHold|joystick)_(.+)$/.exec(id);
-  return `조이스틱 ${LY_DIR_LABEL[m?.[2]] ?? m?.[2]}${m?.[1] === 'joystickHold' ? ' 길게' : ' 짧게'}`;
+  const m = /^joystick_(.+)$/.exec(id);
+  return `조이스틱 ${LY_DIR_LABEL[m?.[1]] ?? m?.[1]}`;
 }
 
 async function lyApps() {
@@ -355,14 +353,14 @@ export function lyKnob(layer) {
     knobFace({ labels, color: layer.color, on: (d) => Boolean(layer.dial[d]), part }));
 }
 
-/** 조이스틱 그림: 방향 수만큼 부채꼴, 짧게/길게 전환. 칸을 고르는 곳은 여기 하나 */
+/** 조이스틱 그림: 방향 수만큼 부채꼴. 칸을 고르는 곳은 여기 하나 (길게는 2026-10-12에 없앰 — 설정의 '유지해야 입력') */
 export function lyJoystick(layer, redraw = renderLayers) {
   const j = layer.joystick;
   const seg = (opts, cur, onPick, label) => h('div', { class: 'layers ly-seg', role: 'group', 'aria-label': label },
     ...opts.map(([v, t]) => h('button', { 'aria-pressed': String(String(v) === String(cur)), onclick: () => onPick(v) }, t)));
   const dirs = lyDirs(j.directions, j.axis);
-  const bag = ly.joyLong ? j.long : j.short;
-  const prefix = ly.joyLong ? 'joystickHold_' : 'joystick_';
+  const bag = j.short;
+  const prefix = 'joystick_';
   const box = joystickFace({
     dirs, labels: Object.fromEntries(dirs.map((d) => [d, (bag[d] ? actionLabel(bag[d]) : '')])), color: layer.color, on: (d) => Boolean(bag[d]),
     wedge: (d) => {
@@ -378,7 +376,6 @@ export function lyJoystick(layer, redraw = renderLayers) {
   return h('div', { class: `ly-widget${layer.locked ? ' ly-locked' : ''}` }, h('div', { class: 'ly-title' }, '조이스틱'),
     layer.locked || layer.fixedDirections ? null : seg([[1, '1'], [2, '2'], [4, '4'], [8, '8']], j.directions, (v) => { j.directions = Number(v); ly.slot = null; renderLayers(); }, '방향 수'),
     !layer.locked && !layer.fixedDirections && j.directions === 2 ? seg([['vertical', '위/아래'], ['horizontal', '왼쪽/오른쪽']], j.axis, (v) => { j.axis = v; ly.slot = null; renderLayers(); }, '축') : null,
-    seg([[false, '짧게'], [true, '길게 (0.5초)']], ly.joyLong, (v) => { ly.joyLong = v === true || v === 'true'; ly.slot = null; redraw(); }, '짧게·길게'),
     box,
     h('div', { class: 'small muted' }, layer.locked ? '프리셋 칸은 볼 수만 있습니다.' : layer.fixedDirections ? '진한 칸은 프리셋 칸, 빈 칸은 눌러서 정합니다.' : '부채꼴을 눌러 동작을 정하세요.'));
 }
@@ -445,7 +442,6 @@ function lyLockedOf(p) {
   const s = new Set([...Object.keys(p.keyLabels ?? {}), ...Object.keys(p.keys ?? {})]);
   for (const k of Object.keys(p.dial)) s.add(`dial_${k}`);
   for (const d of Object.keys(p.joystick?.short ?? {})) s.add(`joystick_${d}`);
-  for (const d of Object.keys(p.joystick?.long ?? {})) s.add(`joystickHold_${d}`);
   return s;
 }
 /** 프리셋을 연결한 레이어의 그림용 보기: 프리셋 칸은 잠그고, 빈 칸은 레이어 것을 보여 준다 (2026-10-04) */
@@ -453,7 +449,7 @@ function lyPresetView(layer) {
   const p = lyPresets.list.find((x) => x.id === layer.preset);
   // 조이스틱을 정하지 않은 프리셋(Orca)이면 조이스틱은 방향 수까지 레이어 것
   const j = p.joystick
-    ? { directions: p.joystick.directions, axis: p.joystick.axis, short: { ...layer.joystick.short, ...p.joystick.short }, long: { ...layer.joystick.long, ...p.joystick.long } }
+    ? { directions: p.joystick.directions, axis: p.joystick.axis, short: { ...layer.joystick.short, ...p.joystick.short } }
     : layer.joystick;
   return { ...layer, lockedSlots: lyLockedOf(p), fixedDirections: Boolean(p.joystick), keyLabels: p.keyLabels,
     keys: { ...layer.keys, ...p.keys }, dial: { ...layer.dial, ...p.dial }, joystick: j };
@@ -570,7 +566,7 @@ export async function renderLayers() {
     h('button', { class: 'btn', onclick: () => {
       const id = `l-new-${Date.now()}`;
       // 다른 레이어와 겹치지 않는 색 (2026-10-10)
-      ly.data.push({ id, kind: 'user', name: '새 레이어', color: pickKeyColor(ly.data.map((l) => l.color)), preset: null, apps: [], keys: {}, dial: {}, joystick: { directions: 4, axis: 'vertical', short: {}, long: {} } });
+      ly.data.push({ id, kind: 'user', name: '새 레이어', color: pickKeyColor(ly.data.map((l) => l.color)), preset: null, apps: [], keys: {}, dial: {}, joystick: { directions: 4, axis: 'vertical', short: {} } });
       ly.sel = id; ly.slot = null; renderLayers();
     } }, '+ 레이어'));
   // 고른 레이어가 보이게 옆으로 스크롤 (세로는 움직이지 않는다)

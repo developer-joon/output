@@ -277,7 +277,7 @@ describe('M7 / 서비스 — 소스 감시와 단축키', () => {
       { name: 'Orca', bundleIds: ['com.stablyai.orca'], actions: [{ labelKo: '목록', keystroke: 'cmd+1' }, { labelKo: 'x', keystroke: null }] },
     ] };
     const r = readSourcesFile(v1, [SOURCE]);
-    assert.deepEqual(r.controlsByName.get('Orca').joystickHold.down, { labelKo: '목록', keystroke: 'cmd+1' });
+    assert.equal(r.controlsByName.get('Orca')?.joystickHold, undefined, 'A키는 버린다 (조이스틱 길게는 2026-10-12에 없앰)');
     assert.equal(r.controlsByName.has('VS Code'), false);
     const v7 = readSourcesFile({ version: 7, layers: [] }, [SOURCE]);
     assert.equal(v7.layersRaw, null);
@@ -285,11 +285,11 @@ describe('M7 / 서비스 — 소스 감시와 단축키', () => {
     const h = svc({ profilesFile: v1 });
     await h.s.start();
     assert.ok(h.s.logs.some((l) => /Orca 설정만/.test(l.messageKo)));
-    assert.ok(h.s.logs.some((l) => /아래 길게/.test(l.messageKo)));
+    assert.ok(h.s.logs.some((l) => /A키 단축키 1개\(목록\)는 옮길 자리가 없어 버렸습니다/.test(l.messageKo)));
     assert.ok(h.s.logs.some((l) => /레이어로 옮겼습니다/.test(l.messageKo)));
     const layers = h.s.layersGet();
     assert.equal(layers.find((l) => l.id === 'l-orca').preset, 'orca');
-    assert.equal(slotsOf(layers.find((l) => l.id === 'l-orca')).joystickHold_down.keystroke, 'cmd+1', 'A키(아래 길게)는 열린 칸이라 옮겨진다');
+    assert.equal(JSON.stringify(slotsOf(layers.find((l) => l.id === 'l-orca'))).includes('cmd+1'), false);
     assert.equal(h.s.layersSave(layers).ok, true);
     const saved = JSON.parse(fs.readFileSync(path.join(h.s.stateDir, 'profiles.json'), 'utf8'));
     assert.equal(saved.version, 6);

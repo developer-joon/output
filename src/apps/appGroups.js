@@ -15,7 +15,7 @@ function recentApps(layers) {
     for (const app of l.apps ?? []) push(app.bundleId, app.name);
     for (const a of Object.values(l.keys ?? {})) fromAction(a);
     for (const a of Object.values(l.dial ?? {})) fromAction(a);
-    for (const a of [...Object.values(l.joystick?.short ?? {}), ...Object.values(l.joystick?.long ?? {})]) fromAction(a);
+    for (const a of Object.values(l.joystick?.short ?? {})) fromAction(a);
   }
   return out;
 }

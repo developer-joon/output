@@ -12,7 +12,7 @@ import { capabilitiesFrom } from '../device/calibrationLoader.js';
 import { InputDecoder } from '../input/inputDecoder.js';
 import { DeviceEventDecoder } from '../input/deviceEventDecoder.js';
 import { makeDispatcher } from '../input/intentDispatcher.js';
-import { sectorsFor, dirsFor } from './controls.js';
+import { sectorsFor } from './controls.js';
 import { createOrcaStack, SOURCE as ORCA_SOURCE } from '../adapters/orca/index.js';
 import { createPersistence } from '../adapters/persistence/index.js';
 import { parseKeymap, otherLayerNames, OUR_LAYERS } from '../keymap/keymapModel.js';
@@ -176,6 +176,7 @@ export class OutputService extends EventEmitter {
     this.eventDecoder = new DeviceEventDecoder({ decoder: this.decoder, calibration });
     this._joystickSectors = calibration.joystick?.sectors ?? null;
     this._applyDecoder(this.layers[0]);
+    this.decoder.setJoystickDwell(this._prefs.joystickDwellMs);
 
     this.guard = new DeviceGuard({
       open: () => this.openRuntimeTransport(),
@@ -516,17 +517,16 @@ export class OutputService extends EventEmitter {
     this._changed();
   }
 
-  /** 레이어의 조이스틱 방향 수·축·길게 칸을 입력 해석기에 반영한다 (프리셋이면 프리셋 것) */
+  /** 레이어의 조이스틱 방향 수·축을 입력 해석기에 반영한다 (프리셋이면 프리셋 것) */
   _applyDecoder(layer) {
     const j = joystickOf(layer);
     this.decoder.setSectors(sectorsFor(j.directions, this._joystickSectors, j.axis));
-    this.decoder.setHoldDirections(dirsFor(j.directions, j.axis).filter((d) => j.long[d]));
   }
 
   /** 의도 → 레이어 칸 id */
   _slotOf(intent) {
     if (intent.type === 'dial') return `dial_${intent.direction}`;
-    if (intent.type === 'joystick') return `${intent.hold ? 'joystickHold' : 'joystick'}_${intent.direction}`;
+    if (intent.type === 'joystick') return `joystick_${intent.direction}`;
     if (intent.type !== 'tap') return null;
     if (intent.key === 'dial_click') return 'dial_press';
     const m = /^slot(10|[1-9])$/.exec(intent.key ?? '');

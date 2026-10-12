@@ -12,6 +12,17 @@ const LAYER_FLASH_MS = 300;
 const BATTERY_FLASH_MS = 1000;
 const BATTERY_LOW = 15;
 
+/** 조이스틱 '유지해야 입력' 시간 (2026-10-12 사용자 결정: 레이어마다가 아니라 설정에 공통). 0 = 바로 입력 */
+export const JOYSTICK_DWELL_CHOICES = Object.freeze([0, 200, 300, 500]);
+
+export function normalizePrefs(raw) {
+  return {
+    hud: { knob: raw?.hud?.knob !== false, joystick: raw?.hud?.joystick !== false },
+    night: normalizeNight(raw?.night),
+    joystickDwellMs: JOYSTICK_DWELL_CHOICES.includes(raw?.joystickDwellMs) ? raw.joystickDwellMs : 0,
+  };
+}
+
 /**
  * OutputService의 설정(prefs.json)·노브/조이스틱 화면 표시·연결 인사 (2026-10-10 outputService.js에서 나눔).
  * OutputService.prototype에 붙는다 — this는 서비스다.
@@ -65,11 +76,11 @@ export class HudPrefsMethods {
     return path.join(this.stateDir, 'prefs.json');
   }
 
-  /** 설정 (기본: 노브·조이스틱 표시 켬). 모르는 값은 기본 */
+  /** 설정 (기본: 노브·조이스틱 표시 켬, 조이스틱은 바로 입력). 모르는 값은 기본 */
   _loadPrefs() {
     let raw = null;
     try { raw = JSON.parse(fs.readFileSync(this._prefsFile(), 'utf8')); } catch { /* 없으면 기본 */ }
-    return { hud: { knob: raw?.hud?.knob !== false, joystick: raw?.hud?.joystick !== false }, night: normalizeNight(raw?.night) };
+    return normalizePrefs(raw);
   }
 
   prefsGet() {
@@ -77,9 +88,10 @@ export class HudPrefsMethods {
   }
 
   prefsSet(raw) {
-    this._prefs = { hud: { knob: raw?.hud?.knob !== false, joystick: raw?.hud?.joystick !== false }, night: normalizeNight(raw?.night) };
+    this._prefs = normalizePrefs(raw);
     try { writeJsonAtomic(this._prefsFile(), this._prefs); } catch (err) { return { ok: false, errorKo: `저장하지 못했습니다: ${err.message}` }; }
     this._applyNight();
+    this.decoder.setJoystickDwell(this._prefs.joystickDwellMs);
     return { ok: true };
   }
 
@@ -91,8 +103,8 @@ export class HudPrefsMethods {
       const dz = this.decoder.deadzone;
       const dir = p.d >= dz ? this.decoder._directionFromAngle(p.a) : null;
       if (dir !== this._hudJoy.dir) this._hudJoy = { dir, enteredAt: dir ? this.now() : null };
-      const hud = joystickHud({ angle: p.a, distance: p.d, dir, sectors: this.decoder.sectors, deadzone: dz, holdMs: this.decoder.holdMs,
-        holdDirs: [...(this.decoder._holdDirs ?? [])], slots: this._slots, enteredAt: this._hudJoy.enteredAt });
+      const hud = joystickHud({ angle: p.a, distance: p.d, dir, sectors: this.decoder.sectors, deadzone: dz,
+        dwellMs: this.decoder.joystickDwellMs, slots: this._slots, enteredAt: this._hudJoy.enteredAt });
       this.emit('hud', p.d < dz ? { ...hud, end: true } : { ...hud, heldMs: dir ? this.now() - this._hudJoy.enteredAt : 0 });
       return;
     }

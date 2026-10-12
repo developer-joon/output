@@ -96,7 +96,7 @@ describe('M13 / 레이어 모델 v6', () => {
     assert.equal(l.preset, null); assert.equal(l.kind, 'user'); assert.deepEqual(l.apps, []);
     assert.equal(l.name, 'Orca 복사본');
     assert.deepEqual(l.dial, {}, 'Orca 노브는 Orca 동작이라 복사되지 않는다');
-    assert.deepEqual(l.joystick, { directions: 4, axis: 'vertical', short: {}, long: {} });
+    assert.deepEqual(l.joystick, { directions: 4, axis: 'vertical', short: {} });
     assert.equal(validateLayers(normalizeLayers([l])).ok, true);
     assert.equal(layerFromPreset('nope', 'l-x'), null);
   });
@@ -112,12 +112,13 @@ describe('M13 / 레이어 모델 v6', () => {
     const defPreset = normalizeLayers([{ id: 'default', kind: 'default', preset: 'orca' }]);
     assert.equal(resolveLayer(defPreset, 'com.apple.finder').mode, 'orca', '기본에도 프리셋을 연결할 수 있다');
   });
-  it('N11 v4 옮기기는 v6 모양으로 — 조이스틱은 열린 칸이라 단축키를 살리고, Orca 동작 칸만 노트', () => {
+  it('N11 v4 옮기기는 v6 모양으로 — 조이스틱 길게는 지우고(2026-10-12), Orca 동작 칸만 노트', () => {
     const notes = [];
     const ls = migrateToLayers({ controlsRaw: { joystickHold: { down: { labelKo: '탭', keystroke: 'cmd+1' } } }, appKeysRaw: null }, notes);
     const o = ls.find((l) => l.id === 'l-orca');
     assert.equal(o.preset, 'orca');
-    assert.equal(slotsOf(o).joystickHold_down.keystroke, 'cmd+1');
+    assert.equal(slotsOf(o).joystickHold_down, undefined);
+    assert.ok(notes.some((n) => /길게 동작 1개를 지웠습니다/.test(n)), notes.join('|'));
     assert.ok(notes.some((n) => /옮기지 못한.*조이스틱 아래 \(다음 미확인 완료\)/.test(n)), notes.join('|'));
   });
   it('N12 profiles.json v6: v5·v6은 layersRaw, 더 새 버전은 거부', () => {
@@ -305,25 +306,23 @@ describe('M13 / 프리셋이 비운 칸은 레이어가 정한다 (2026-10-04 �
   });
   it('Q02 실행 칸 = 레이어의 빈 칸 동작 + 프리셋 칸 (프리셋이 이긴다), 조이스틱을 정하지 않은 프리셋이면 방향 수도 레이어 것', () => {
     const l = orcaWith({ dial: { press: sc('cmd+k'), cw: sc('cmd+z') },
-      joystick: { directions: 8, axis: 'vertical', short: { up: sc('cmd+x'), up_left: sc('cmd+q') }, long: { up: sc('cmd+u') } } });
+      joystick: { directions: 8, axis: 'vertical', short: { up: sc('cmd+x'), up_left: sc('cmd+q') } } });
     const s = slotsOf(l);
     assert.equal(s.dial_press.builtin, 'toggle_view', '프리셋 칸이 이긴다');
     assert.equal(s.dial_cw.builtin, 'next_session', '프리셋 칸은 그대로');
     assert.equal(s.joystick_up.keystroke, 'cmd+x');
-    assert.equal(s.joystickHold_up.keystroke, 'cmd+u');
     assert.equal(s.joystick_up_left.keystroke, 'cmd+q', '레이어가 8방향이면 대각선도');
     assert.equal(joystickOf(l).directions, 8);
   });
-  it('Q03 Orca 모드에서 조이스틱 위 길게에 넣은 레이어 동작이 실행된다 (노브 누름은 프리셋의 모드 변경)', async () => {
+  it('Q03 Orca 모드에서 조이스틱 위에 넣은 레이어 동작이 실행된다 (노브 누름은 프리셋의 모드 변경)', async () => {
     const [d, o] = defaultLayers();
-    const { s, calls } = await svc({ layers: [d, { ...o, dial: { press: sc('cmd+k') }, joystick: { directions: 4, axis: 'vertical', short: {}, long: { up: sc('cmd+u') } } }] });
+    const { s, calls } = await svc({ layers: [d, { ...o, dial: { press: sc('cmd+k') }, joystick: { directions: 4, axis: 'vertical', short: { up: sc('cmd+u') } } }] });
     await s.watcher.tick(); assert.equal(s.mode, 'orca');
     let modeBack = 0; s.bridge.pressModeBack = () => { modeBack += 1; return true; };
     await s._onIntent({ type: 'tap', key: 'dial_click' });
     assert.equal(modeBack, 1);
     assert.equal(calls.length, 0, '레이어에 남은 노브 누름 단축키는 실행되지 않는다');
-    assert.deepEqual([...s.decoder._holdDirs], ['up'], '길게 판정은 레이어의 길게 칸만');
-    await s._onIntent({ type: 'joystick', direction: 'up', hold: true });
+    await s._onIntent({ type: 'joystick', direction: 'up' });
     assert.deepEqual(calls.at(-1), ['synth', { key: 'u', modifiers: ['command'] }]);
   });
   it('Q04 프리셋 소개: 만든 날짜·기준 Orca 버전·동작·제약', () => {
@@ -335,7 +334,7 @@ describe('M13 / 프리셋이 비운 칸은 레이어가 정한다 (2026-10-04 �
 });
 
 describe('M13 / 옮기기 — 열린 칸은 살린다', () => {
-  it('Q05 v5 Orca 레이어의 조이스틱 단축키는 옮기고, 노브 누름(이제 프리셋 칸)과 조이스틱의 Orca 동작은 노트', () => {
+  it('Q05 v5 Orca 레이어의 조이스틱 단축키는 옮기고, 노브 누름(이제 프리셋 칸)과 조이스틱의 Orca 동작은 노트, 길게는 지움', () => {
     const notes = [];
     const v5 = { id: 'orca', kind: 'orca', dial: { cw: { type: 'builtin', builtin: 'next_session' }, ccw: { type: 'builtin', builtin: 'prev_session' }, press: { type: 'shortcut', label: '받아쓰기', keystroke: 'cmd+e' } },
       joystick: { directions: 4, short: { up: { type: 'shortcut', label: '받아쓰기', keystroke: 'cmd+e' }, down: { type: 'builtin', builtin: 'next_unseen' } }, long: { up: { type: 'shortcut', label: '위', keystroke: 'cmd+u' } } } };
@@ -343,9 +342,9 @@ describe('M13 / 옮기기 — 열린 칸은 살린다', () => {
     assert.equal(o.dial.press, undefined);
     assert.equal(o.joystick.short.up.keystroke, 'cmd+e');
     assert.equal(o.joystick.short.down, undefined);
-    assert.equal(o.joystick.long.up.keystroke, 'cmd+u');
+    assert.equal('long' in o.joystick, false);
     assert.equal(slotsOf(o).dial_press.builtin, 'toggle_view');
-    assert.deepEqual(notes, ['프리셋과 달라 버린 Orca 설정: 노브 누름 (받아쓰기)', 'Orca 동작이라 옮기지 못한 칸: 조이스틱 아래 (다음 미확인 완료)']);
+    assert.deepEqual(notes, ["'orca' 레이어의 조이스틱 길게 동작 1개를 지웠습니다 (길게 기능 없앰).", '프리셋과 달라 버린 Orca 설정: 노브 누름 (받아쓰기)', 'Orca 동작이라 옮기지 못한 칸: 조이스틱 아래 (다음 미확인 완료)']);
   });
 });
 

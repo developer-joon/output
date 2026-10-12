@@ -18,16 +18,16 @@ const SECTORS4 = [
 const sc = (label, keystroke) => ({ type: 'shortcut', label, keystroke });
 
 describe('M23 / 표시 모델', () => {
-  it('H01 조이스틱: 지금 위치·구간·들어간 방향과 그 동작 이름(짧게·길게), 길게 판정 시작 시각', () => {
-    const slots = { joystick_up: sc('다음 탭', 'cmd+]'), joystickHold_up: sc('새 창', 'cmd+n'), joystick_left: sc('뒤로', 'cmd+[') };
-    const hud = joystickHud({ angle: 0.75, distance: 0.8, dir: 'up', sectors: SECTORS4, deadzone: 0.05, holdMs: 500, holdDirs: ['up'], slots, enteredAt: 100 });
+  it('H01 조이스틱: 지금 위치·구간·들어간 방향과 그 동작 이름, 유지해야 입력 시간과 들어간 시각', () => {
+    const slots = { joystick_up: sc('다음 탭', 'cmd+]'), joystick_left: sc('뒤로', 'cmd+[') };
+    const hud = joystickHud({ angle: 0.75, distance: 0.8, dir: 'up', sectors: SECTORS4, deadzone: 0.05, dwellMs: 300, slots, enteredAt: 100 });
     assert.equal(hud.kind, 'joystick');
     assert.deepEqual([hud.angle, hud.distance, hud.dir, hud.deadzone], [0.75, 0.8, 'up', 0.05]);
-    assert.deepEqual(hud.sectors.map((s) => [s.direction, s.short, s.long]), [['right', null, null], ['down', null, null], ['left', '뒤로', null], ['up', '다음 탭', '새 창']]);
-    assert.deepEqual([hud.hold, hud.enteredAt, hud.holdMs], [true, 100, 500], '길게 칸이 있는 방향이면 0.5초 고리');
-    const n = joystickHud({ angle: 0, distance: 0, dir: null, sectors: SECTORS4, deadzone: 0.05, holdMs: 500, holdDirs: [], slots, enteredAt: null });
+    assert.deepEqual(hud.sectors.map((s) => [s.direction, s.label]), [['right', null], ['down', null], ['left', '뒤로'], ['up', '다음 탭']]);
+    assert.deepEqual([hud.enteredAt, hud.dwellMs], [100, 300], '유지해야 입력이면 고리가 찬다');
+    const n = joystickHud({ angle: 0, distance: 0, dir: null, sectors: SECTORS4, deadzone: 0.05, slots, enteredAt: null });
     assert.equal(n.dir, null);
-    assert.equal(n.hold, false);
+    assert.equal(n.dwellMs, 0);
   });
   it('H02 노브: 방향(돌림·누름)과 동작 이름, 동작이 없으면 "동작 없음"', () => {
     const slots = { dial_cw: sc('다음 탭', 'ctrl+tab'), dial_press: { type: 'builtin', builtin: 'toggle_view', label: '모드 변경 (전체 ↔ 상세)' } };
@@ -43,7 +43,7 @@ async function svc(prefs) {
   if (prefs) fs.writeFileSync(path.join(stateDir, 'prefs.json'), JSON.stringify(prefs));
   fs.writeFileSync(path.join(stateDir, 'profiles.json'), JSON.stringify({ version: 6, layers: [
     { id: 'default', kind: 'default', name: '기본', color: '#5A8CDC', preset: null, apps: [], keys: {}, dial: { cw: sc('볼륨', 'volume_up') },
-      joystick: { directions: 4, axis: 'vertical', short: { up: sc('위', 'up') }, long: {} } }] }));
+      joystick: { directions: 4, axis: 'vertical', short: { up: sc('위', 'up') } } }] }));
   const st = { now: 1000 };
   const s = new OutputService({ calibration: CAL, stateDir, orcaEnabled: false, now: () => st.now,
     openRuntimeTransport: async () => { throw Object.assign(new Error('x'), { code: 'DEVICE_NOT_FOUND' }); },
@@ -64,7 +64,7 @@ describe('M23 / 서비스', () => {
     s._hudInput({ m: RAD_EVENT, p: { a: up, d: 0.7 } });
     s._hudInput({ m: RAD_EVENT, p: { a: 0, d: 0 } });
     assert.deepEqual(huds.map((h) => [h.kind, h.dir, h.enteredAt, h.end ?? false]), [['joystick', 'up', 1000, false], ['joystick', 'up', 1000, false], ['joystick', null, null, true]]);
-    assert.equal(huds[0].sectors.find((x) => x.direction === 'up').short, '위');
+    assert.equal(huds[0].sectors.find((x) => x.direction === 'up').label, '위');
   });
   it('H04 노브 돌림·누름은 그 동작 이름으로 hud', async () => {
     const { s, huds } = await svc();

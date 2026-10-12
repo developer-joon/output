@@ -1,6 +1,6 @@
 /**
  * 노브·조이스틱 화면 표시 그리기 (2026-10-10).
- * 조이스틱: 디코더와 같은 구간 · 지금 위치 점 · 들어간 칸 강조 · 길게 칸이면 0.5초 고리. 노브: 동작 이름 한 줄.
+ * 조이스틱: 디코더와 같은 구간 · 지금 위치 점 · 들어간 칸 강조 · '유지해야 입력'이 켜져 있으면 차오르는 고리. 노브: 동작 이름 한 줄.
  * 장치 각도 규약 right = 0, down = 0.25 (시계 방향) — 캔버스 각도와 방향이 같다.
  */
 const root = document.getElementById('hud');
@@ -27,16 +27,16 @@ function drawJoystick(canvas) {
     if (s.from === s.to) g.arc(c, c, R, 0, Math.PI * 2);
     else g.arc(c, c, R, T(s.from), T(s.to + (s.to < s.from ? 1 : 0)));
     g.closePath();
-    g.fillStyle = active ? 'rgba(255,255,255,.30)' : (s.short || s.long ? 'rgba(255,255,255,.10)' : 'rgba(255,255,255,.04)');
+    g.fillStyle = active ? 'rgba(255,255,255,.30)' : (s.label ? 'rgba(255,255,255,.10)' : 'rgba(255,255,255,.04)');
     g.fill();
     g.strokeStyle = 'rgba(255,255,255,.22)'; g.lineWidth = 1; g.stroke();
   }
   // 반응하지 않는 가운데
   g.beginPath(); g.arc(c, c, Math.max(8, R * hud.deadzone), 0, Math.PI * 2);
   g.fillStyle = 'rgba(0,0,0,.35)'; g.fill();
-  // 길게: 0.5초 고리
+  // 유지해야 입력 (설정, 2026-10-12): 차오르는 고리, 다 차면 입력됨
   const held = hud.dir ? hud.heldMs + (performance.now() - recvAt) : 0;
-  const p = hud.hold && hud.dir ? Math.min(1, held / hud.holdMs) : 0;
+  const p = hud.dwellMs > 0 && hud.dir ? Math.min(1, held / hud.dwellMs) : 0;
   if (p > 0) {
     g.beginPath(); g.arc(c, c, R - 1, -Math.PI / 2, -Math.PI / 2 + p * Math.PI * 2);
     g.strokeStyle = p >= 1 ? '#f2a36b' : 'rgba(242,163,107,.75)'; g.lineWidth = 4; g.lineCap = 'round'; g.stroke();
@@ -88,11 +88,10 @@ function render() {
     if (!hud.dir) label.append(el('small', '', '가운데'));
     else {
       const arrow = DIR_ARROW[hud.dir] ?? '';
-      const long = p >= 1 && s?.long;
-      label.append(el('div', '', `${arrow} ${long ? `길게: ${s.long}` : (s?.short ?? '동작 없음')}`));
-      if (s?.long && !long) label.append(el('small', '', `길게 누르면: ${s.long}`));
+      label.append(el('div', '', `${arrow} ${s?.label ?? '동작 없음'}`));
+      if (hud.dwellMs > 0 && s?.label && p < 1) label.append(el('small', '', '유지하면 입력'));
     }
-    if (hud.hold && hud.dir && p < 1) raf = requestAnimationFrame(tick);
+    if (hud.dwellMs > 0 && hud.dir && p < 1) raf = requestAnimationFrame(tick);
   };
   tick();
 }

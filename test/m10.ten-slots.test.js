@@ -1,6 +1,6 @@
 /**
  * M10 — 칸 10개 (스펙 docs/superpowers/specs/2026-10-01-ten-slots-design.md).
- * J: 조이스틱 길게 · R: A키 제거와 옮기기 · T: 칸 10개
+ * J: 조이스틱 유지해야 입력 (길게는 2026-10-12에 없앰) · R: A키 제거 · T: 칸 10개
  */
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
@@ -37,93 +37,104 @@ function decoder() {
   return { d, out, at: (ms) => { t = ms; } };
 }
 
-describe('M10 / 조이스틱 길게', () => {
-  it('J01 길게 칸이 없는 방향은 기울이는 순간 짧게가 나간다 (지연 없음)', () => {
+describe('M10 / 조이스틱 유지해야 입력 (길게는 2026-10-12에 없앰)', () => {
+  it('J01 유지 시간이 0(기본)이면 기울이는 순간 나간다 (지연 없음)', () => {
     const { d, out } = decoder();
-    d.setHoldDirections([]);
     d.joystickPolar(DOWN);
-    assert.equal(out.length, 1);
-    assert.equal(out[0].direction, 'down');
-    assert.equal(out[0].hold, false);
+    assert.deepEqual(out.map((i) => i.direction), ['down']);
+    assert.equal('hold' in out[0], false, '길게 구분이 없다');
   });
 
-  it('J02 길게 칸이 있는 방향은 500ms 전에 떼면 뗄 때 짧게 하나만', () => {
+  it('J02 유지 시간 전에 놓으면 아무것도 나가지 않는다', () => {
     const { d, out, at } = decoder();
-    d.setHoldDirections(['down']);
+    d.setJoystickDwell(300);
     at(0); d.joystickPolar(DOWN);
     assert.equal(out.length, 0, '들어갈 때는 아무것도 내지 않는다');
-    at(300); d.tick();
+    at(200); d.tick();
+    at(250); d.joystickPolar(NEUTRAL);
+    at(600); d.tick();
     assert.equal(out.length, 0);
-    at(350); d.joystickPolar(NEUTRAL);
-    assert.deepEqual(out.map((i) => [i.direction, i.hold]), [['down', false]]);
   });
 
-  it('J03 500ms 머물면 tick에서 길게 하나, 그 뒤 떼도 짧게는 없다', () => {
+  it('J03 유지 시간이 지나면 tick에서 하나, 더 머물거나 놓아도 더 나가지 않는다', () => {
     const { d, out, at } = decoder();
-    d.setHoldDirections(['down']);
+    d.setJoystickDwell(300);
     at(0); d.joystickPolar(DOWN);
-    at(500); d.tick();
+    at(300); d.tick();
     at(900); d.tick();
     at(950); d.joystickPolar(NEUTRAL);
-    assert.deepEqual(out.map((i) => [i.direction, i.hold]), [['down', true]]);
+    assert.deepEqual(out.map((i) => i.direction), ['down']);
   });
 
-  it('J04 500ms 전에 다른 방향으로 넘어가면 앞 방향은 버리고 새 방향으로 판정한다', () => {
+  it('J04 유지 시간 전에 다른 방향으로 넘어가면 앞 방향은 버리고 새 방향으로 다시 잰다', () => {
     const { d, out, at } = decoder();
-    d.setHoldDirections(['down']);
+    d.setJoystickDwell(300);
     at(0); d.joystickPolar(DOWN);
-    at(200); d.joystickPolar(LEFT);       // left는 길게 칸 없음 → 즉시 짧게
-    at(800); d.tick();
-    assert.deepEqual(out.map((i) => [i.direction, i.hold]), [['left', false]]);
-  });
-
-  it('J05 같은 방향 안에서 흔들려도(거리·각도 변화) 판정을 다시 시작하지 않는다', () => {
-    const { d, out, at } = decoder();
-    d.setHoldDirections(['down']);
-    at(0); d.joystickPolar(DOWN);
-    at(300); d.joystickPolar({ angle: 0.27, distance: 0.8 });
+    at(200); d.joystickPolar(LEFT);
+    at(400); d.tick();
+    assert.equal(out.length, 0, 'left는 200부터 재서 아직 아니다');
     at(500); d.tick();
-    assert.deepEqual(out.map((i) => [i.direction, i.hold]), [['down', true]]);
+    assert.deepEqual(out.map((i) => i.direction), ['left']);
   });
 
-  it('J06 판정 중 연결이 끊기면 짧게도 길게도 나가지 않는다', () => {
+  it('J05 같은 방향 안에서 흔들려도(거리·각도 변화) 다시 재지 않는다', () => {
     const { d, out, at } = decoder();
-    d.setHoldDirections(['down']);
+    d.setJoystickDwell(300);
+    at(0); d.joystickPolar(DOWN);
+    at(200); d.joystickPolar({ angle: 0.27, distance: 0.8 });
+    at(300); d.tick();
+    assert.deepEqual(out.map((i) => i.direction), ['down']);
+  });
+
+  it('J06 재는 중 연결이 끊기면 나가지 않는다', () => {
+    const { d, out, at } = decoder();
+    d.setJoystickDwell(300);
     at(0); d.joystickPolar(DOWN);
     d.disconnected();
     at(600); d.tick();
-    d.joystickPolar(NEUTRAL);
     assert.equal(out.length, 0);
   });
 
-  it('J07 길게 방향을 바꾸면 진행 중 판정은 잊는다', () => {
+  it('J07 유지 시간을 바꾸면 재던 것은 잊고, 모르는 값은 0(바로)', () => {
     const { d, out, at } = decoder();
-    d.setHoldDirections(['down']);
+    d.setJoystickDwell(300);
     at(0); d.joystickPolar(DOWN);
-    d.setHoldDirections([]);
+    d.setJoystickDwell(500);
     at(600); d.tick();
     assert.equal(out.length, 0);
+    d.setJoystickDwell(-1);
+    assert.equal(d.joystickDwellMs, 0);
   });
 });
 
-describe('M10 / 조이스틱 길게 설정', () => {
-  // J08~J11(controls 모델·Output.joystick)은 2026-10-03 레이어 전환으로 m12 L05·L10·L15가 대신한다
-  it('J12 서비스가 Orca 레이어의 길게 방향을 디코더에 넣는다', async () => {
+describe('M10 / 조이스틱 유지해야 입력 설정', () => {
+  it('J12 설정(prefs.json)의 유지 시간을 디코더에 넣고, 다시 켜도 남는다. 고를 수 있는 값만', async () => {
     const { OutputService } = await import('../src/service/outputService.js');
     const { UNCALIBRATED } = await import('../src/device/calibrationLoader.js');
-    const s = new OutputService({
-      calibration: { ...UNCALIBRATED, joystick: { sectors: CAL4, deadzone: 0.05 } },
-      stateDir: fs.mkdtempSync(path.join(os.tmpdir(), 'cb-hold-')),
+    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cb-dwell-'));
+    const mk = () => new OutputService({
+      calibration: { ...UNCALIBRATED, joystick: { sectors: CAL4, deadzone: 0.05 } }, stateDir,
       openRuntimeTransport: async () => { const e = new Error('x'); e.code = 'DEVICE_NOT_FOUND'; throw e; },
       orcaEnabled: false, timers: { setInterval: () => ({}), clearInterval: () => {} },
       frontmost: async () => 'com.stablyai.orca',
     });
-    await s.watcher.tick();     // 2026-10-04: Orca 프리셋은 조이스틱을 정하지 않는다 — 길게 방향은 레이어가 정한 것만
-    assert.deepEqual([...s.decoder._holdDirs], []);
-    const ls = s.layersGet();
-    ls.find((l) => l.id === 'l-orca').joystick.long.down = { type: 'shortcut', label: '새 에이전트 탭', keystroke: 'cmd+alt+t' };
-    assert.equal(s.layersSave(ls).ok, true);
-    assert.deepEqual([...s.decoder._holdDirs], ['down']);
+    const s = mk();
+    assert.equal(s.prefsGet().joystickDwellMs, 0);
+    assert.equal(s.decoder.joystickDwellMs, 0);
+    assert.equal(s.prefsSet({ ...s.prefsGet(), joystickDwellMs: 300 }).ok, true);
+    assert.equal(s.decoder.joystickDwellMs, 300);
+    assert.equal(mk().decoder.joystickDwellMs, 300, '다시 켜도');
+    s.prefsSet({ ...s.prefsGet(), joystickDwellMs: 1234 });
+    assert.equal(s.decoder.joystickDwellMs, 0, '고를 수 없는 값은 바로');
+  });
+
+  it('J13 저장된 레이어의 조이스틱 길게 동작은 지우고 한 줄 남긴다 (옮기지 않는다)', async () => {
+    const { normalizeLayers } = await import('../src/apps/layers.js');
+    const notes = [];
+    const ls = normalizeLayers([{ id: 'default', kind: 'default', joystick: { short: {}, long: { down: { type: 'shortcut', label: '새 탭', keystroke: 'cmd+t' } } } }], notes);
+    assert.equal('long' in ls[0].joystick, false);
+    assert.equal(Object.keys(ls[0].joystick.short).length, 0);
+    assert.ok(notes.some((n) => /길게 동작 1개를 지웠습니다/.test(n)));
   });
 });
 
@@ -131,16 +142,10 @@ const ORCA = [{ name: 'Orca', bundleIds: ['com.stablyai.orca'] }];
 const v2 = (actions, controls) => ({ version: 2, sources: [{ name: 'Orca', actions, ...(controls ? { controls } : {}) }] });
 
 describe('M10 / A키 제거와 옮기기', () => {
-  it('R01 v2의 A2를 조이스틱 아래 길게로 옮기고 한 줄 남긴다', () => {
-    const r = readSourcesFile(v2([null, { labelKo: '새 탭', keystroke: 'cmd+shift+t' }, null, null]), ORCA);
-    assert.deepEqual(r.controlsByName.get('Orca').joystickHold.down, { labelKo: '새 탭', keystroke: 'cmd+shift+t' });
-    assert.ok(r.notesKo.some((n) => /아래 길게/.test(n)));
-  });
-
-  it('R02 A2가 비면 첫 번째로 설정된 A키를 옮기고, 나머지는 버렸다고 남긴다', () => {
-    const r = readSourcesFile(v2([null, null, { labelKo: 'diff', keystroke: 'cmd+d' }, { labelKo: 'log', keystroke: 'cmd+l' }]), ORCA);
-    assert.equal(r.controlsByName.get('Orca').joystickHold.down.keystroke, 'cmd+d');
-    assert.ok(r.notesKo.some((n) => /1개/.test(n) && /log/.test(n)));
+  it('R01 v2의 A키는 옮길 자리가 없어 버리고 한 줄 남긴다 (예전엔 조이스틱 아래 길게로 옮겼다 — 길게는 없앰)', () => {
+    const r = readSourcesFile(v2([null, { labelKo: '새 탭', keystroke: 'cmd+shift+t' }, null, { labelKo: 'log', keystroke: 'cmd+l' }]), ORCA);
+    assert.equal(r.controlsByName.get('Orca')?.joystickHold, undefined);
+    assert.ok(r.notesKo.some((n) => /2개/.test(n) && /새 탭/.test(n) && /log/.test(n)));
   });
 
   it('R03 이미 저장된 아래 길게는 덮지 않는다', () => {
@@ -157,7 +162,7 @@ describe('M10 / A키 제거와 옮기기', () => {
     assert.ok(r.warningKo);
   });
 
-  it('R05 저장 파일은 v5 레이어이고 actions 칸이 없다 · 다시 켜도 옮긴 값이 남는다', async () => {
+  it('R05 저장 파일은 v6 레이어이고 actions 칸이 없다 · 버린 A키는 다시 켜도 없다', async () => {
     const { OutputService } = await import('../src/service/outputService.js');
     const { UNCALIBRATED } = await import('../src/device/calibrationLoader.js');
     const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cb-mig-'));
@@ -173,7 +178,7 @@ describe('M10 / A키 제거와 옮기기', () => {
     assert.equal(saved.version, 6);
     assert.equal(JSON.stringify(saved).includes('"actions"'), false);
     assert.equal(mk().layersGet().find((l) => l.id === 'l-orca').preset, 'orca');
-    assert.equal(slotsOf(mk().layersGet().find((l) => l.id === 'l-orca')).joystickHold_down.keystroke, 'cmd+alt+t', '옮긴 A키(아래 길게)가 다시 켜도 남는다');
+    assert.equal(JSON.stringify(slotsOf(mk().layersGet().find((l) => l.id === 'l-orca'))).includes('cmd+alt+t'), false);
   });
 
   it('R06 렌더 스냅샷과 조명에 A키가 없다', () => {

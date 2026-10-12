@@ -227,7 +227,6 @@ export function flattenSlots(layer) {
   if (!layer.joystick) return out;
   for (const d of dirsFor(layer.joystick.directions, layer.joystick.axis)) {
     if (layer.joystick.short[d]) out[`joystick_${d}`] = layer.joystick.short[d];
-    if (layer.joystick.long[d]) out[`joystickHold_${d}`] = layer.joystick.long[d];
   }
   return out;
 }

@@ -114,11 +114,11 @@ describe('M12 / 레이어 모델', () => {
     const [d, o, c] = ls;
     assert.equal(o.preset, 'orca', '옛 Orca 설정은 Orca 프리셋 레이어로 (2026-10-04)');
     assert.deepEqual(slotsOf(o).joystick_up, { type: 'shortcut', label: '받아쓰기', keystroke: 'cmd+e' });
-    assert.equal(slotsOf(o).joystickHold_down.keystroke, 'cmd+alt+t');
+    assert.equal(slotsOf(o).joystickHold_down, undefined, '옛 길게는 지운다 (2026-10-12)');
     assert.equal(d.keys.key1.bundleId, 'com.tinyspeck.slackmacgap');
     assert.equal(c.kind, 'user'); assert.deepEqual(c.apps, [{ bundleId: 'com.google.Chrome', name: 'Chrome' }]);
     assert.equal(c.keys.key3.keystroke, 'cmd+shift+]');
-    assert.equal(c.joystick.long.down.keystroke, 'cmd+x');
+    assert.equal('long' in c.joystick, false);
     assert.match(c.id, /^l-/);
   });
   it('L12 profiles.json v5: v5는 layersRaw로, 더 새 버전은 거부', () => {
@@ -159,11 +159,11 @@ describe('M12 / 서비스', () => {
     st.front = 'com.jetbrains.intellij'; await s.watcher.tick(); await s._onIntent({ type: 'tap', key: 'slot3' });
     assert.equal(calls.filter((c) => c[0] === 'synth').length, 2);
   });
-  it('L15 옛 v4 설정을 읽어도 Orca 조이스틱 아래 길게 = ⌘⌥T, 노브 = 다음 세션', async () => {
+  it('L15 옛 v4 설정을 읽어도 노브 = 다음 세션, 옛 조이스틱 아래 길게(⌘⌥T)는 지워져 실행되지 않는다 (2026-10-12)', async () => {
     const { s, calls } = await layerSvc({ profiles: { version: 4, sources: [{ name: 'Orca', controls: { joystickHold: { down: { labelKo: '새 에이전트 탭', keystroke: 'cmd+alt+t' } } } }], appKeys: null } });
     await s.watcher.tick(); assert.equal(s.mode, 'orca');
-    await s._onIntent({ type: 'joystick', direction: 'down', hold: true });
-    assert.deepEqual(calls.at(-1), ['synth', { key: 't', modifiers: ['command', 'option'] }]);
+    await s._onIntent({ type: 'joystick', direction: 'down' });
+    assert.equal(calls.some((c) => c[1]?.key === 't'), false);
     let stepped = 0; s.bridge.runBuiltin = (b) => { if (b === 'next_session') stepped += 1; return null; };
     await s._onIntent({ type: 'dial', direction: 'cw' });
     assert.equal(stepped, 1);

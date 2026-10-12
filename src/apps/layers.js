@@ -15,22 +15,21 @@ const ALL_DIRS = ['any', ...DIRS8];
 const ID_RE = /^l-[A-Za-z0-9-]+$/;
 const BUNDLE_RE = /^[A-Za-z0-9.-]+$/;
 const HEX_RE = /^#[0-9a-f]{6}$/i;
-const emptyJoystick = () => ({ directions: 4, axis: 'vertical', short: {}, long: {} });
+const emptyJoystick = () => ({ directions: 4, axis: 'vertical', short: {} });
 /** 칸 id → 사람이 읽는 이름 (노브·조이스틱 칸). 상태판 키 그림도 쓴다 */
 export const SLOT_NAME_KO = (id) => {
   if (id === 'dial_cw') return '노브 시계 방향';
   if (id === 'dial_ccw') return '노브 반시계 방향';
   if (id === 'dial_press') return '노브 누름';
   const DIR = { any: '모든 방향', up: '위', up_right: '오른쪽 위', right: '오른쪽', down_right: '오른쪽 아래', down: '아래', down_left: '왼쪽 아래', left: '왼쪽', up_left: '왼쪽 위' };
-  const m = /^(joystickHold|joystick)_(.+)$/.exec(id);
-  return m ? `조이스틱 ${DIR[m[2]] ?? m[2]}${m[1] === 'joystickHold' ? ' 길게' : ''}` : id;
+  const m = /^joystick_(.+)$/.exec(id);
+  return m ? `조이스틱 ${DIR[m[1]] ?? m[1]}` : id;
 };
 
 /** v4 이하의 Orca 조이스틱 기본값 — 옛 설정 옮기기에만 쓴다 (2026-10-04부터 Orca 프리셋은 조이스틱을 정하지 않음) */
 const LEGACY_ORCA_JOYSTICK = {
   directions: 4, axis: 'vertical',
   short: { up: sc('받아쓰기', 'cmd+e'), right: sc('히스토리 앞으로', 'cmd+alt+right'), down: builtin('next_unseen'), left: sc('히스토리 뒤로', 'cmd+alt+left') },
-  long: { down: sc('새 에이전트 탭', 'cmd+alt+t') },
 };
 
 export function defaultLayers() {
@@ -54,6 +53,9 @@ function normalizeMap(raw, ids, { keepLed = false } = {}) {
 
 function normalizeLayer(r, kind, notesKo) {
   const j = r.joystick ?? {};
+  // 조이스틱 '길게'는 없앴다 (2026-10-12 사용자 결정: 옮기지 않고 지운다. 대신 설정의 '유지해야 입력')
+  const dropped = Object.keys(normalizeMap(j.long, ALL_DIRS));
+  if (dropped.length) notesKo.push(`'${r.name || r.id}' 레이어의 조이스틱 길게 동작 ${dropped.length}개를 지웠습니다 (길게 기능 없앰).`);
   let preset = typeof r.preset === 'string' ? r.preset : null;
   if (preset && !presetById(preset)) {
     notesKo.push(`'${r.name || r.id}' 레이어의 프리셋 '${preset}'을(를) 몰라 직접 설정으로 읽었습니다.`);
@@ -74,7 +76,6 @@ function normalizeLayer(r, kind, notesKo) {
       directions: [1, 2, 4, 8].includes(j.directions) ? j.directions : 4,
       axis: j.axis === 'horizontal' ? 'horizontal' : 'vertical',
       short: normalizeMap(j.short, ALL_DIRS),
-      long: normalizeMap(j.long, ALL_DIRS),
     },
     // 언더글로우 (2026-10-10): Orca 프리셋 레이어는 늘 Orca 상태라 저장하지 않는다. null = 레이어 색 고정
     underglow: preset === 'orca' ? null : normalizeUnderglow(r.underglow),
@@ -107,7 +108,7 @@ function fromOrcaKind(r, takenBundleIds, notesKo) {
     color: HEX_RE.test(r.color ?? '') ? r.color : '#1F9E96',
     apps: ORCA_PRESET.defaultApps.filter((a) => !takenBundleIds.has(a.bundleId)).map((a) => ({ ...a })),
     dial: keep(old.dial, 'dial_'),
-    joystick: { directions: pj?.directions ?? old.joystick.directions, axis: pj?.axis ?? old.joystick.axis, short: keep(old.joystick.short, 'joystick_'), long: keep(old.joystick.long, 'joystickHold_') },
+    joystick: { directions: pj?.directions ?? old.joystick.directions, axis: pj?.axis ?? old.joystick.axis, short: keep(old.joystick.short, 'joystick_') },
   };
 }
 
@@ -137,7 +138,7 @@ export { flattenSlots };
 export function joystickOf(layer) {
   const p = layer.preset ? presetById(layer.preset).joystick : null;
   if (!p) return layer.joystick;      // 조이스틱을 정하지 않은 프리셋이면 통째로 레이어 것
-  return { directions: p.directions, axis: p.axis, short: { ...layer.joystick.short, ...p.short }, long: { ...layer.joystick.long, ...p.long } };
+  return { directions: p.directions, axis: p.axis, short: { ...layer.joystick.short, ...p.short } };
 }
 
 /** 실행에 쓰는 칸: 프리셋이 정한 칸은 프리셋 것, 비운 칸은 레이어 것 */
@@ -145,7 +146,7 @@ export function slotsOf(layer) {
   if (!layer.preset) return flattenSlots(layer);
   const locked = presetLockedSlots(layer.preset);
   const j = joystickOf(layer);
-  const own = flattenSlots({ ...layer, joystick: { ...j, short: layer.joystick.short, long: layer.joystick.long } });
+  const own = flattenSlots({ ...layer, joystick: { ...j, short: layer.joystick.short } });
   const open = Object.fromEntries(Object.entries(own).filter(([id]) => !locked.has(id)));
   return { ...open, ...presetSlots(layer.preset) };
 }
@@ -183,7 +184,7 @@ export function layerFromPreset(presetId, id) {
   return {
     id, kind: 'user', name: `${p.name} 복사본`, color: '#E8762B', preset: null, apps: [], keys: {},
     dial: plain(p.dial),
-    joystick: p.joystick ? { directions: p.joystick.directions, axis: p.joystick.axis, short: plain(p.joystick.short), long: plain(p.joystick.long) } : emptyJoystick(),
+    joystick: p.joystick ? { directions: p.joystick.directions, axis: p.joystick.axis, short: plain(p.joystick.short) } : emptyJoystick(),
   };
 }
 
@@ -201,7 +202,7 @@ function fromSlots(slots = {}) {
   const keys = {}; const dial = {}; const short = {}; const long = {};
   for (const [id, a] of Object.entries(slots)) {
     let m;
-    if ((m = /^joystickHold_(.+)$/.exec(id))) long[m[1]] = a;
+    if ((m = /^joystickHold_(.+)$/.exec(id))) long[m[1]] = a;   // 옛 길게 — normalizeLayer가 지우고 알린다
     else if ((m = /^joystick_(.+)$/.exec(id))) short[m[1]] = a;
     else if ((m = /^dial_(cw|ccw)$/.exec(id))) dial[m[1]] = a;
     else keys[id] = a;

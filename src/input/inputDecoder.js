@@ -34,8 +34,9 @@ export class InputDecoder {
     this._joystickActive = null;
     this.droppedBounces = 0;
     this.droppedRotations = 0;
-    this._holdDirs = new Set();      // 길게 칸이 설정된 조이스틱 방향
-    this._joyPending = null;         // {dir, at, fired} — 길게 판정 중인 기울임
+    // 조이스틱 '유지해야 입력' (2026-10-12 사용자 결정, '길게'는 없앰): 0이면 들어가는 즉시, 아니면 이만큼 유지해야 낸다
+    this.joystickDwellMs = 0;
+    this._joyPending = null;         // {dir, at, fired} — 유지 시간을 재는 중인 기울임
   }
 
   get pressedKeys() {
@@ -72,9 +73,9 @@ export class InputDecoder {
       }
     }
     const p = this._joyPending;
-    if (p && !p.fired && t - p.at >= this.holdMs) {
+    if (p && !p.fired && t - p.at >= this.joystickDwellMs) {
       p.fired = true;
-      fired.push(this._emit({ type: 'joystick', direction: p.dir, hold: true, at: t }));
+      fired.push(this._emit({ type: 'joystick', direction: p.dir, at: t }));
     }
     return fired;
   }
@@ -101,32 +102,30 @@ export class InputDecoder {
     this._joyPending = null;
   }
 
-  /** 길게 칸이 설정된 방향 (설정 저장 때마다). 진행 중인 판정은 잊는다 */
-  setHoldDirections(dirs) {
-    this._holdDirs = new Set(dirs ?? []);
+  /** 유지해야 입력 시간 (설정). 진행 중인 판정은 잊는다 */
+  setJoystickDwell(ms) {
+    this.joystickDwellMs = Number.isFinite(ms) && ms > 0 ? ms : 0;
     this._joyPending = null;
     this._joystickActive = null;
   }
 
-  /** 중립 복귀. 길게 판정 중이었고 아직 길게가 안 나갔으면 짧게를 낸다 */
+  /** 중립 복귀. 유지 시간 전에 놓았으면 아무것도 내지 않는다 */
   _joyNeutral() {
-    const p = this._joyPending;
     this._joyPending = null;
     this._joystickActive = null;
-    if (p && !p.fired) return this._emit({ type: 'joystick', direction: p.dir, hold: false, at: this.now() });
     return null;
   }
 
-  /** 새 방향에 들어감. 길게 칸이 없으면 즉시 짧게, 있으면 판정 시작 (앞 판정은 버린다) */
+  /** 새 방향에 들어감. 유지 시간이 없으면 즉시, 있으면 재기 시작 (앞 판정은 버린다) */
   _joyEnter(dir, extra = {}) {
     if (this._joystickActive === dir) return null;
     this._joystickActive = dir;
     this._joyPending = null;
-    if (this._holdDirs.has(dir)) {
+    if (this.joystickDwellMs > 0) {
       this._joyPending = { dir, at: this.now(), fired: false };
       return null;
     }
-    return this._emit({ type: 'joystick', direction: dir, hold: false, ...extra, at: this.now() });
+    return this._emit({ type: 'joystick', direction: dir, ...extra, at: this.now() });
   }
 
   /**

@@ -1,6 +1,6 @@
 /**
  * profiles.json — 레이어 (v5·v6). v4 이하는 소스별 노브·조이스틱 설정 + 앱별 키였다.
- * v2까지 있던 A1~A4 단축키는 키 7~10이 칸이 되며 없어졌다. 읽을 때 한 칸을 조이스틱 아래 길게로 옮긴다.
+ * v2까지 있던 A1~A4 단축키는 키 7~10이 칸이 되며 없어졌다. 읽을 때 버리고 알린다 (조이스틱 길게는 2026-10-12에 없앰).
  * 레이어(layersRaw)·앱별 키(appKeysRaw)는 원본만 돌려준다 — 정리는 layers.js가 한다 (순환 import 회피).
  */
 export const SOURCE_FILE_VERSION = 6;
@@ -60,21 +60,13 @@ function legacyAction(a) {
   return { labelKo: typeof a.labelKo === 'string' ? a.labelKo : '', keystroke: ks };
 }
 
-/** 옛 A1~A4를 controls 원본에 옮긴다. A2 우선, 없으면 첫 번째 설정 칸. 저장된 아래 길게는 덮지 않는다 */
+/** 옛 A1~A4는 옮길 자리가 없어 버리고 알린다 (예전에는 조이스틱 아래 길게로 옮겼다 — 길게는 2026-10-12에 없앴다) */
 function migrateActions(actions, controls, notesKo) {
-  const list = (Array.isArray(actions) ? actions : []).slice(0, 4).map(legacyAction);
-  const pick = list[1] ?? list.find(Boolean) ?? null;
-  if (!pick) return controls;
-  let out = controls;
-  if (controls?.joystickHold?.down === undefined) {
-    out = { ...controls, joystickHold: { ...(controls?.joystickHold ?? {}), down: pick } };
-    notesKo.push(`A키 단축키 '${pick.labelKo || pick.keystroke}'을(를) 조이스틱 아래 길게로 옮겼습니다 (키 7~10은 칸 7~10).`);
+  const list = (Array.isArray(actions) ? actions : []).slice(0, 4).map(legacyAction).filter(Boolean);
+  if (list.length) {
+    notesKo.push(`A키 단축키 ${list.length}개(${list.map((a) => a.labelKo || a.keystroke).join(', ')})는 옮길 자리가 없어 버렸습니다. 필요하면 레이어에서 키·노브·조이스틱에 다시 넣으세요.`);
   }
-  const dropped = list.filter((a) => a && a !== pick);
-  if (dropped.length) {
-    notesKo.push(`A키 단축키 ${dropped.length}개(${dropped.map((a) => a.labelKo || a.keystroke).join(', ')})는 옮길 자리가 없어 버렸습니다. 필요하면 Orca 키 탭에서 조이스틱·노브에 다시 넣으세요.`);
-  }
-  return out;
+  return controls;
 }
 
 /**
