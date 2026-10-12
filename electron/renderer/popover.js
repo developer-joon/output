@@ -56,10 +56,8 @@ function warningEl(w) {
     ? h('button', { onclick: () => cb.invoke('cb:openPermission', 'inputMonitoring') }, '입력 모니터링 열기')
     : w.action === 'open-accessibility'
       ? h('button', { onclick: () => cb.invoke('cb:openPermission', 'accessibility') }, '손쉬운 사용 열기')
-      : w.action === 'open-device'
-        ? h('button', { onclick: () => cb.invoke('cb:openSettings', 'about') }, '앱 정보')
-      : w.action === 'open-setup'
-        ? h('button', { onclick: () => cb.invoke('cb:openSettings', 'about') }, '앱 정보')
+      : w.action === 'open-device' || w.action === 'open-setup'
+        ? h('button', { onclick: () => cb.invoke('cb:openSettings', 'setup') }, '설치 열기')
         : null;
   const tone = w.level === 'error' ? 'error' : w.level === 'info' ? 'info' : 'warn';
   return h('div', { class: `notice ${tone}`, dataset: { warning: w.code } }, w.messageKo, action);

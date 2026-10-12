@@ -53,7 +53,7 @@ export class SelfCheckMethods {
       const ds = this.deviceStatus();
       add('keymap', '장치 설정', ds.ready,
         ds.ready ? `Output 레이어 (키 1~13 = AG00~AG12)` : ds.reasonsKo.join(' · '),
-        ds.ready ? null : '앱 정보 → 설치 단계 4 → 장치 준비', ds.ready ? null : 'device-prep');
+        ds.ready ? null : '설정 → 설치 → 4 장치 준비', ds.ready ? null : 'device-prep');
     }
 
     // 4. LED 테스트

@@ -379,6 +379,14 @@ function registerIpc() {
     return { paused };
   });
   handle('cb:logs', () => service.logs.slice(-100));
+  // 기록 지우기 (2026-10-12): 화면의 최근 기록 + 기록 파일 두 개(launch.log, .1)
+  handle('cb:logs:clear', () => {
+    service.logs.length = 0;
+    try {
+      for (const f of ['launch.log', 'launch.log.1']) fs.rmSync(path.join(STATE_DIR, f), { force: true });
+    } catch (err) { return { ok: false, messageKo: `기록 파일을 지우지 못했습니다: ${err.message}` }; }
+    return { ok: true, messageKo: '기록을 지웠습니다.' };
+  });
   handle('cb:info', () => ({ versions: service.versions, stateDir: STATE_DIR }));
   // 점검하기 (2026-10-12): 권한·장치·LED 테스트·Orca·레이어·환경. 작업 이름·경로는 넣지 않는다
   handle('cb:check:run', () => service.selfCheck({
@@ -451,7 +459,7 @@ async function main() {
   const setup = readSetup();
   trace(`main: setup completed=${Boolean(setup.completed)}`);
   if (!setup.completed && !SMOKE) {
-    openSettingsWindow('about');
+    openSettingsWindow('setup');
     // 메뉴바 전용(LSUIElement) 앱의 새 창은 앱을 앞으로 가져오지 않는다. 처음 사용자는 창을 봐야 한다.
     app.focus({ steal: true });
     settings?.focus();

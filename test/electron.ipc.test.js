@@ -34,8 +34,12 @@ describe('개선 4 / IPC 채널 드리프트', () => {
     for (const c of ['cb:keymap:load', 'cb:keymap:state', 'cb:keymap:edit', 'cb:keymap:apply', 'cb:keymap:backups', 'cb:keymap:restore']) assert.equal(allowed.has(c), false, c);
   });
 
-  it('I04 설정 맨 아래 메뉴는 \'앱 정보\' — 안내 문구도 같은 이름을 쓴다 (2026-10-11)', () => {
-    assert.match(read('../electron/renderer/settings.html'), /data-nav="about"[^>]*>앱 정보</);
+  it('I04 설정 아래쪽 메뉴는 설치 · 점검 · 기록 · 앱 정보 (2026-10-12) — 장치 준비 안내는 \'설치\'를 가리킨다', () => {
+    const html = read('../electron/renderer/settings.html');
+    assert.deepEqual([...html.matchAll(/data-nav="(\w+)"[^>]*>([^<]+)</g)].map((m) => [m[1], m[2]]).slice(-4), [['setup', '설치'], ['check', '점검'], ['logs', '기록'], ['about', '앱 정보']]);
+    for (const f of ['../src/service/outputService.js', '../src/service/selfCheck.js', '../electron/renderer/popover.js']) {
+      assert.equal(read(f).includes('앱 정보 →'), false, f);
+    }
     for (const f of ['../electron/renderer/popover.js', '../electron/renderer/settings.html', '../src/service/outputService.js']) {
       assert.equal(read(f).includes('정보 · 진단'), false, f);
     }

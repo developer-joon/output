@@ -159,14 +159,14 @@ export async function smoke(c) {
       await snap(c.popover, 'popover-keys');
       await c.popover.webContents.executeJavaScript(`document.querySelectorAll('.tab')[0].click()`);
     }
-    for (const t of ['layers', 'presets', 'about']) {
+    for (const t of ['layers', 'presets', 'prefs', 'setup', 'check', 'logs', 'about']) {
       await c.settings.webContents.executeJavaScript(`document.querySelector('[data-nav="${t}"]').click()`);
       await wait(700);
       await snap(c.settings, `settings-${t}`);
     }
     const js = (code) => c.settings.webContents.executeJavaScript(code);
     // 장치 준비 흐름: 바뀌는 내용까지만 (쓰지는 않는다)
-    await js(`document.querySelector('[data-nav="about"]').click()`);
+    await js(`document.querySelector('[data-nav="setup"]').click()`);
     await wait(500);
     // 2026-10-11: 장치 칸을 없앴다 — 준비가 안 된 장치에서만 설치 단계 4에 '장치 준비'가 있다
     await js(`[...document.querySelectorAll('button')].find(b => /장치 준비/.test(b.textContent))?.click()`);
@@ -175,6 +175,8 @@ export async function smoke(c) {
     await wait(200);
     await snap(c.settings, 'device-plan');
     // 점검하기 (2026-10-12): LED 테스트까지 돌고 결과 칸이 그려지는지
+    await js(`document.querySelector('[data-nav="check"]').click()`);
+    await wait(500);
     await js(`[...document.querySelectorAll('button')].find(b => b.textContent === '점검하기')?.click()`);
     for (let i = 0; i < 40 && !(await js(`document.querySelectorAll('[data-check]').length`)); i++) await wait(500);
     await js(`document.querySelector('.check-section')?.scrollIntoView()`);
@@ -271,8 +273,8 @@ export async function smoke(c) {
     // 화면 캡처 동작 (2026-10-10): 키 2를 화면 캡처로 → 모니터·저장 칸, 자동 이름
     await js(`(() => { const s = document.querySelector('select[aria-label="동작 종류"]'); s.value = 'screenshot'; s.dispatchEvent(new Event('change')); })()`);
     await wait(300);
-    await js(`(() => { const s = document.querySelector('select[aria-label="캡처할 모니터"]'); s.value = '2'; s.dispatchEvent(new Event('change', { bubbles: true })); })()`);
-    await wait(300);
+    // 모니터 목록은 지금 연결된 것만 (2026-10-12) — 고르지 않고 목록만 찍는다
+    console.log(`smoke: 모니터 칸 ${await js(`[...document.querySelectorAll('select[aria-label="캡처할 모니터"] option')].map((o) => o.textContent).join(' | ')`)}`);
     await snap(c.settings, 'layers-screenshot');
     await js(`document.querySelector('[data-layer-slot="key3"]')?.click()`);
     await wait(300);
