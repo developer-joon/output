@@ -291,3 +291,11 @@ input[type=text], select { border: 1px solid #cfc9bd; border-radius: 8px; paddin
 button.lchip { font: inherit; cursor: pointer; }
 button.lchip:not(.on):hover { background: rgba(0,0,0,.04); }
 .lchip.auto { border-style: dashed; border-color: var(--line); color: var(--ink-2); background: transparent; }
+
+/* 조이스틱 유지해야 입력 눈금 (2026-10-12) */
+.dwell-row { align-items: flex-start; gap: 16px; margin-top: 10px; }
+.dwell-track { position: relative; padding-bottom: 22px; }
+.dwell-range { width: 100%; accent-color: var(--ink); margin: 0; }
+.dwell-marks { position: absolute; left: 8px; right: 8px; bottom: 0; height: 16px; }
+.dwell-marks span { position: absolute; transform: translateX(-50%); font-size: 11px; color: var(--muted); white-space: nowrap; }
+.dwell-value { min-width: 48px; text-align: right; font-size: 15px; }

@@ -128,6 +128,14 @@ describe('M10 / 조이스틱 유지해야 입력 설정', () => {
     assert.equal(s.decoder.joystickDwellMs, 0, '고를 수 없는 값은 바로');
   });
 
+  it('J14 유지 시간 눈금 (2026-10-12): 0~1초는 0.1초, 1~5초는 0.5초 간격 — 그 밖의 값은 바로', async () => {
+    const { JOYSTICK_DWELL_CHOICES, normalizePrefs } = await import('../src/service/hudPrefs.js');
+    assert.deepEqual(JOYSTICK_DWELL_CHOICES, [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000]);
+    assert.equal(normalizePrefs({ joystickDwellMs: 3500 }).joystickDwellMs, 3500);
+    assert.equal(normalizePrefs({ joystickDwellMs: 1200 }).joystickDwellMs, 0);
+    assert.equal(normalizePrefs({ joystickDwellMs: 5500 }).joystickDwellMs, 0);
+  });
+
   it('J13 저장된 레이어의 조이스틱 길게 동작은 지우고 한 줄 남긴다 (옮기지 않는다)', async () => {
     const { normalizeLayers } = await import('../src/apps/layers.js');
     const notes = [];

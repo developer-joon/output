@@ -159,7 +159,7 @@ async function renderPrefs() {
   mount(main, panel('설정', [
     '화면 표시: 노브·조이스틱을 쓰면 마우스가 있는 화면 아래 가운데에 밝기 조절 표시처럼 잠깐 보여 줍니다.',
     '표시 창은 클릭이 통과하고 포커스를 가져가지 않습니다 — 단축키는 그대로 앞 앱으로 갑니다.',
-    '조이스틱 유지해야 입력: 바로(기본)면 밀자마자 입력됩니다. 시간을 정하면 그만큼 밀고 있어야 입력됩니다.',
+    '조이스틱 유지해야 입력: 눈금을 좌우로 끌어 정합니다 (바로 ~ 5초). 바로(기본)면 밀자마자 입력되고, 시간을 정하면 그만큼 밀고 있어야 입력됩니다.',
   ],
   h('div', { class: 'card pref-card' },
     h('h3', {}, '화면 표시'),
@@ -169,21 +169,29 @@ async function renderPrefs() {
   nightCard(prefs)));
 }
 
-/** 조이스틱 유지해야 입력 (2026-10-12 사용자 결정: 레이어마다가 아니라 공통). 정한 시간 전에 놓으면 아무것도 안 한다 */
-const DWELL_CHOICES = [[0, '바로'], [200, '0.2초'], [300, '0.3초'], [500, '0.5초']];
+/** 조이스틱 유지해야 입력 (2026-10-12 사용자 결정: 레이어마다가 아니라 공통, 좌우로 끄는 눈금 · 최대 5초).
+ *  정한 시간 전에 놓으면 아무것도 안 한다. 눈금은 서비스의 JOYSTICK_DWELL_CHOICES와 같다 */
+const DWELL_STOPS = [...Array.from({ length: 11 }, (_, i) => i * 100), ...Array.from({ length: 8 }, (_, i) => 1500 + i * 500)];
+const dwellText = (ms) => (ms === 0 ? '바로' : `${ms % 1000 === 0 ? ms / 1000 : (ms / 1000).toFixed(1)}초`);
 function joystickCard(prefs) {
-  const seg = h('div', { class: 'layers ly-seg', role: 'group', 'aria-label': '조이스틱 유지해야 입력' },
-    ...DWELL_CHOICES.map(([ms, t]) => h('button', { 'aria-pressed': String(prefs.joystickDwellMs === ms), dataset: { dwell: String(ms) }, onclick: async () => {
-      const was = prefs.joystickDwellMs;
-      prefs.joystickDwellMs = ms;
-      const r = await cb.invoke('cb:prefs:set', prefs);
-      if (!r.ok) prefs.joystickDwellMs = was;
-      renderPrefs();
-    } }, t)));
+  const at = Math.max(0, DWELL_STOPS.indexOf(prefs.joystickDwellMs));
+  const value = h('strong', { class: 'dwell-value' }, dwellText(DWELL_STOPS[at]));
+  const range = h('input', { type: 'range', min: 0, max: DWELL_STOPS.length - 1, step: 1, value: at, class: 'dwell-range', 'aria-label': '조이스틱 유지해야 입력 시간' });
+  range.addEventListener('input', () => { value.textContent = dwellText(DWELL_STOPS[Number(range.value)]); });
+  range.addEventListener('change', async () => {
+    const was = prefs.joystickDwellMs;
+    prefs.joystickDwellMs = DWELL_STOPS[Number(range.value)];
+    const r = await cb.invoke('cb:prefs:set', prefs);
+    if (!r.ok) { prefs.joystickDwellMs = was; renderPrefs(); }
+  });
+  // 눈금 아래 글자: 바로 · 1초 · 2초 … 5초 (칸 위치에 맞춰 놓는다)
+  const marks = h('div', { class: 'dwell-marks' }, ...[0, 1000, 2000, 3000, 4000, 5000].map((ms) =>
+    h('span', { style: { left: `${(DWELL_STOPS.indexOf(ms) / (DWELL_STOPS.length - 1)) * 100}%` } }, dwellText(ms))));
   return h('div', { class: 'card pref-card' },
     h('h3', {}, '조이스틱'),
-    h('div', { class: 'pref-row' }, h('span', { class: 'pref-text' }, h('strong', {}, '유지해야 입력'),
-      h('span', { class: 'small muted' }, '방향으로 민 채 이 시간이 지나야 입력됩니다. 그 전에 놓으면 아무것도 하지 않아, 살짝 건드려 잘못 입력되는 일을 막습니다. 모든 레이어에 같이 적용됩니다.')), seg));
+    h('div', { class: 'pref-text' }, h('strong', {}, '유지해야 입력'),
+      h('span', { class: 'small muted' }, '방향으로 민 채 이 시간이 지나야 입력됩니다. 그 전에 놓으면 아무것도 하지 않아, 살짝 건드려 잘못 입력되는 일을 막습니다. 모든 레이어에 같이 적용됩니다. 1초까지는 0.1초, 그 뒤로는 0.5초 단위입니다.')),
+    h('div', { class: 'row-flex dwell-row' }, h('div', { class: 'grow dwell-track' }, range, marks), value));
 }
 
 /** 밤 시간 밝기 (2026-10-10): 켜기·끄기와 시작·끝 시각. 구간 안에서는 LED가 한 단계(반) 어둡다 */

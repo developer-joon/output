@@ -207,6 +207,10 @@ export async function smoke(c) {
       await js(`document.querySelector('[data-nav="prefs"]').click()`);
       await wait(500);
       await snap(c.settings, 'settings-prefs');
+      // 유지해야 입력 눈금 (2026-10-12): 끄는 동안 값 글자만 바뀐다 (저장은 놓을 때 — 여기선 저장하지 않는다)
+      await js(`(() => { const r = document.querySelector('.dwell-range'); r.value = '13'; r.dispatchEvent(new Event('input')); })()`);
+      await wait(200);
+      await snap(c.settings, 'settings-prefs-dwell');
     }
     // 추천 프리셋 (2026-10-10): 코드 편집기, 미디어(노브 그림)
     await js(`[...document.querySelectorAll('.layers button')].find((b) => b.textContent === '코드 편집기')?.click()`);

@@ -12,8 +12,12 @@ const LAYER_FLASH_MS = 300;
 const BATTERY_FLASH_MS = 1000;
 const BATTERY_LOW = 15;
 
-/** 조이스틱 '유지해야 입력' 시간 (2026-10-12 사용자 결정: 레이어마다가 아니라 설정에 공통). 0 = 바로 입력 */
-export const JOYSTICK_DWELL_CHOICES = Object.freeze([0, 200, 300, 500]);
+/** 조이스틱 '유지해야 입력' 시간 (2026-10-12 사용자 결정: 레이어마다가 아니라 설정에 공통, 끌어서 고르는 눈금으로 최대 5초).
+ *  0 = 바로 입력. 0~1초는 0.1초, 1~5초는 0.5초 간격 */
+export const JOYSTICK_DWELL_CHOICES = Object.freeze([
+  ...Array.from({ length: 11 }, (_, i) => i * 100),
+  ...Array.from({ length: 8 }, (_, i) => 1500 + i * 500),
+]);
 
 export function normalizePrefs(raw) {
   return {
