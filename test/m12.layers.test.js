@@ -58,12 +58,12 @@ const devLayer = (over = {}) => ({ id: 'l-dev', kind: 'user', name: '개발', co
   dial: {}, joystick: { directions: 2, axis: 'vertical', short: { up: { type: 'shortcut', label: '위', keystroke: 'up' } }, long: {} }, ...over });
 
 describe('M12 / 레이어 모델', () => {
-  it('L05 기본 레이어 둘: 기본(빈)·Orca 프리셋 레이어(노브=다음·이전 세션, 조이스틱 비어 있음) — 2026-10-04 프리셋', () => {
+  it('L05 기본 레이어 둘: 기본(Mac 추천 키, M31)·Orca 프리셋 레이어(노브=다음·이전 세션, 조이스틱 비어 있음) — 2026-10-04 프리셋', () => {
     const [d, o] = defaultLayers();
     assert.equal(o.preset, 'orca'); assert.equal(d.kind, 'default');
     assert.deepEqual(slotsOf(o).dial_cw, { type: 'builtin', builtin: 'next_session', label: '다음 세션' });
     assert.equal(slotsOf(o).joystickHold_down, undefined);
-    assert.deepEqual(d.keys, {});
+    assert.equal(d.keys.key1.keystroke, 'cmd+c');   // 2026-10-14: 기본 레이어는 Mac 추천 키로 시작 (M31)
     assert.ok(BUILTINS.includes('attention'));
   });
   it('L06 normalize: 기본은 맨 앞, 옛 Orca 레이어(kind orca)는 프리셋 레이어로 옮기며 keys를 버림', () => {

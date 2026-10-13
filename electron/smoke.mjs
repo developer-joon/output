@@ -242,6 +242,12 @@ export async function smoke(c) {
     await js(`[...document.querySelectorAll('.ly-list button')].find((b) => b.textContent.includes('기본'))?.click()`);
     await wait(400);
     await snap(c.settings, 'layers-default-narrow');
+    // 추천 키 채우기 (2026-10-14): 빈 칸만 채우고 저장 전 표시. 되돌리기로 원래대로
+    await js(`[...document.querySelectorAll('.ly-head button')].find((b) => b.textContent === '추천 키 채우기')?.click()`);
+    await wait(400);
+    await snap(c.settings, 'layers-default-filled');
+    await js(`[...document.querySelectorAll('button')].find((b) => b.textContent === '되돌리기')?.click()`);
+    await wait(400);
     await js(`[...document.querySelectorAll('.ly-list button')].find((b) => b.textContent.includes('Orca'))?.click()`);
     await wait(300);
     c.settings.setSize(1440, 1180);

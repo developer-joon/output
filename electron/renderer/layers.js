@@ -3,7 +3,7 @@ import { DIR_LABEL, dirsOf, knobFace, joystickFace } from './widgets.js';
 import { actionLabel, autoLabel, POSITION_LABEL } from '../../src/apps/actionLabel.js';
 import { groupApps } from '../../src/apps/appGroups.js';
 import { pickKeyColor, UNDERGLOW_DEFAULT } from '../../src/apps/keyLed.js';
-import { duplicateLayer, slotsOf } from '../../src/apps/layers.js';
+import { duplicateLayer, fillRecommended, slotsOf } from '../../src/apps/layers.js';
 import { shortcutConflicts } from '../../src/apps/shortcutConflicts.js';
 import { panel } from './panel.js';
 
@@ -409,6 +409,12 @@ function lyHeader(layer) {
     ly.msg = { tone: 'info', text: `'${c.name}'을(를) 만들었습니다. 앱을 연결하고 저장하세요.` };
     renderLayers();
   } }, '복제'), row1.lastChild);
+  // 추천 키 채우기 (2026-10-14): 빈 칸만 Mac 추천 키로. 정한 칸은 그대로. 저장해야 반영된다
+  if (fixed && !layer.preset) row1.insertBefore(h('button', { class: 'btn', title: '복사·붙여넣기·Spotlight·볼륨 같은 Mac 기본 키를 빈 칸에만 넣습니다', onclick: () => {
+    const n = fillRecommended(layer);
+    ly.msg = n ? { tone: 'info', text: `빈 칸 ${n}개에 추천 키를 넣었습니다. 저장하면 반영됩니다.` } : { tone: 'info', text: '빈 칸이 없어 바꾼 것이 없습니다.' };
+    ly.slot = null; renderLayers();
+  } }, '추천 키 채우기'), row1.querySelector('.btn'));
 
   const presetSel = lySel([['', '직접 설정'], ...lyPresets.list.map((p) => [p.id, `프리셋: ${p.name}`])], layer.preset ?? '',
     (v) => { layer.preset = v || null; ly.slot = null; renderLayers(); }, '키 배치');

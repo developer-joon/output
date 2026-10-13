@@ -2,7 +2,7 @@ import { normalizeAction, checkAction, BUILTIN_NAMES } from './appKeys.js';
 import { parseKeystroke } from '../service/profiles.js';
 import { DIRS8 } from '../service/controls.js';
 import { normalizeUnderglow, pickKeyColor } from './keyLed.js';
-import { ORCA_PRESET, presetById, presetSlots, presetLockedSlots, flattenSlots, builtin, sc } from './presets.js';
+import { ORCA_PRESET, presetById, presetSlots, presetLockedSlots, flattenSlots, builtin, sc, keysOf } from './presets.js';
 
 /**
  * 레이어 (스펙 2026-10-04-presets-device-design §3). 레이어 = 키 배치 + 연결된 앱들.
@@ -32,9 +32,29 @@ const LEGACY_ORCA_JOYSTICK = {
   short: { up: sc('받아쓰기', 'cmd+e'), right: sc('히스토리 앞으로', 'cmd+alt+right'), down: builtin('next_unseen'), left: sc('히스토리 뒤로', 'cmd+alt+left') },
 };
 
+/** 기본 레이어 Mac 추천 키 (2026-10-14 사용자 요청: 처음 쓰는 사람이 직접 채우기 어렵다). 키 11~13·조이스틱은 비워 둔다 */
+function macRecommended() {
+  const keys = keysOf([['복사', 'cmd+c', '#5A8CDC'], ['붙여넣기', 'cmd+v', '#2BB3E8'], ['실행 취소', 'cmd+z', '#D9A21B'], ['다시 실행', 'cmd+shift+z', '#E08A1F'],
+    ['Spotlight 검색', 'cmd+space', '#8B6BC4'], ['Mission Control', 'ctrl+up', '#1F9E96'], ['창 닫기', 'cmd+w', '#E0481F'], ['새 탭', 'cmd+t', '#3E9B5A'],
+    ['화면 캡처', '', '#C46BA8'], ['이모지 · 기호', 'ctrl+cmd+space', '#9AA0A6']]);
+  const { keystroke, ...shot } = keys.key9;
+  keys.key9 = { ...shot, type: 'screenshot', display: 'main', save: 'clipboard' };
+  return { keys, dial: { cw: sc('볼륨 +', 'volume_up'), ccw: sc('볼륨 −', 'volume_down'), press: sc('음소거', 'mute') } };
+}
+
+/** 빈 칸만 추천 키로 채운다 (이미 정한 칸은 그대로). 채운 칸 수 */
+export function fillRecommended(layer) {
+  const rec = macRecommended();
+  let n = 0;
+  for (const part of ['keys', 'dial']) {
+    for (const [id, a] of Object.entries(rec[part])) if (!layer[part][id]) { layer[part][id] = a; n++; }
+  }
+  return n;
+}
+
 export function defaultLayers() {
   return [
-    { id: 'default', kind: 'default', name: '기본', color: '#5A8CDC', preset: null, apps: [], keys: {}, dial: {}, joystick: emptyJoystick() },
+    { id: 'default', kind: 'default', name: '기본', color: '#5A8CDC', preset: null, apps: [], ...macRecommended(), joystick: emptyJoystick() },
     { id: 'l-orca', kind: 'user', name: 'Orca', color: '#1F9E96', preset: 'orca',
       apps: ORCA_PRESET.defaultApps.map((a) => ({ ...a })), keys: {}, dial: {}, joystick: emptyJoystick() },
   ];

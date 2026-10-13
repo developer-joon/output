@@ -54,7 +54,7 @@ export const ORCA_PRESET = deepFreeze({
 // ───────────── 추천 프리셋 (2026-10-10 사용자 요청). 키 1~8(미디어 1~3)·노브를 정하고, 키 9~13·조이스틱은 레이어가 정한다
 // 키마다 고정 색 (2026-10-10 사용자 요청: 같은 레이어 색이라 키를 구분하기 어려웠다). 평소 모습만, 누를 때 효과 없음
 const keyLed = (color) => ({ normal: { color, effect: 'solid', speed: 'normal', brightness: 'mid' }, press: null, hold: null });
-const keysOf = (list) => Object.fromEntries(list.map(([label, keystroke, color], i) => [`key${i + 1}`, { ...sc(label, keystroke), led: keyLed(color) }]));
+export const keysOf = (list) => Object.fromEntries(list.map(([label, keystroke, color], i) => [`key${i + 1}`, { ...sc(label, keystroke), led: keyLed(color) }]));
 const COMMON_LIMITS = [
   '키 9~13과 조이스틱은 정하지 않습니다 — 레이어에서 정합니다',
   '단축키는 연결된 앱이 앞에 있을 때만 보냅니다',
