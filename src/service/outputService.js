@@ -324,7 +324,7 @@ export class OutputService extends EventEmitter {
       const list = await this.orca.adapter.list({ full });
       this.orca.sync.indexTerminals(list.terminals);
       const d = this.orca.sync.syncOnce(list.units, { hiddenIds: list.hiddenIds, order: list.order });
-      if (d.hidden.length) this._log(`Orca 필터(기본 브랜치 숨기기)로 작업 ${d.hidden.length}개의 자리를 비웠습니다`);
+      if (d.hidden.length) this._log(`Orca 필터(기본 브랜치 숨기기·쉬는 작업)로 작업 ${d.hidden.length}개의 자리를 비웠습니다`);
       // 설정을 못 읽은 경고는 바뀔 때 한 번만 남긴다
       const settingNote = list.notesKo.find((n) => /Orca 설정/.test(n)) ?? null;
       if (settingNote && settingNote !== this._lastOrcaNoteKo) this._log(settingNote, 'warn');

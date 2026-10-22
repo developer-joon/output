@@ -1,6 +1,6 @@
 {
   "name": "output",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "private": true,
   "type": "module",
   "description": "Output — AI 에이전트 작업 상태를 키보드 LED로 보여주고, 한 번 눌러 그곳으로",
