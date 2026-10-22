@@ -114,6 +114,37 @@ export function toChildUnit(t, agent = null, ps = null, acks = {}) {
 }
 
 /**
+ * Orca 내장 채팅 에이전트 (실측 2026-10-22, Orca 1.4.227): 터미널이 없고 `worktree ps`에만
+ * paneKey `structured-agent-session-…`로 나온다. 일이 끝나면 묶음 상태가 inactive가 된다.
+ */
+const CHAT_PANE_PREFIX = 'structured-agent-session-';
+/** 채팅 child id 앞머리. 터미널 핸들이 아니므로 이동 경로가 이것으로 구분한다 */
+export const CHAT_CHILD_PREFIX = 'chat:';
+
+function isChatAgent(a) {
+  return typeof a?.paneKey === 'string' && a.paneKey.startsWith(CHAT_PANE_PREFIX);
+}
+
+/** 채팅 에이전트 → ChildUnit. 상태는 에이전트 보고 그대로, Orca에서 열어 봤으면 확인함 */
+function toChatChild(agent, acks = {}) {
+  let status = statusOfAgent(agent);
+  if (status === Status.DONE_UNSEEN && isAcked(agent, acks)) status = Status.DONE_SEEN;
+  const child = new ChildUnit({
+    id: `${CHAT_CHILD_PREFIX}${agent.paneKey}`,
+    title: agent.agentType ?? 'chat',
+    role: ChildRole.AGENT,
+    status,
+    confidence: confidenceOfAgent(agent),
+    primaryAgent: true,
+    lastActiveAt: agent.stateStartedAt ?? 0,
+    waitingSince: isAttention(status) ? (agent.stateStartedAt ?? 0) : 0,
+    requiredForCompletion: true,
+  });
+  child.doneAt = status === Status.DONE_UNSEEN || status === Status.DONE_SEEN ? agent.stateStartedAt ?? 0 : 0;
+  return child;
+}
+
+/**
  * worktree → WorkUnit
  * @param {object|null} ps `worktree ps`가 준 같은 묶음의 레코드
  */
@@ -121,18 +152,23 @@ export function toWorkUnit(w, terminals = [], agentsByPane = new Map(), ps = nul
   // 묶음 자체의 사실이 있으면 그것이 우선한다. 거절로 멈춘 것은 child가 말해주지 않는다.
   const psOwn = ps ? PS_WORKTREE_STATUS_MAP[ps.status] ?? null : null;
   const own = psOwn ?? WORKSPACE_STATUS_MAP[w.workspaceStatus] ?? null;
+  const panes = new Set(terminals.map((t) => `${t.tabId}:${t.leafId}`));
+  const children = [
+    ...terminals.map((t) => toChildUnit(t, agentsByPane.get(`${t.tabId}:${t.leafId}`) ?? null, ps, acks)),
+    ...(ps?.agents ?? []).filter((a) => isChatAgent(a) && !panes.has(a.paneKey)).map((a) => toChatChild(a, acks)),
+  ];
   return new WorkUnit({
     id: w.id,
     title: w.displayName || w.branch || w.id,
     source: 'orca',
     kind: 'worktree',
-    status: terminals.length ? own : (own ?? Status.UNKNOWN),
+    status: children.length ? own : (own ?? Status.UNKNOWN),
     confidence: Confidence.INFERRED,
     impact: Impact.NORMAL,
     pinned: Boolean(w.isPinned),
     createdAt: w.sortOrder ?? 0,
     ownWaitingSince: psOwn ? psWorktreeWaitingSince(ps) : 0,
-    children: terminals.map((t) => toChildUnit(t, agentsByPane.get(`${t.tabId}:${t.leafId}`) ?? null, ps, acks)),
+    children,
   });
 }
 

@@ -1,5 +1,6 @@
 import { FocusRouter } from '../../core/focusRouter.js';
 import { OrcaCli, FOCUS_COMMAND } from './orcaCli.js';
+import { CHAT_CHILD_PREFIX } from './orcaAdapter.js';
 
 /**
  * Orca 포커스 — **이동만** 한다.
@@ -33,6 +34,11 @@ export class OrcaFocusRouter extends FocusRouter {
           + '터미널을 지정해 주세요.',
         unsupported: true,
       };
+    }
+
+    // 내장 채팅은 터미널이 아니다. CLI에 채팅으로 데려가는 명령이 없다 (Orca 1.4.227, 2026-10-22)
+    if (target.childId.startsWith(CHAT_CHILD_PREFIX)) {
+      return { ok: false, reasonKo: 'Orca 채팅 세션으로 이동하는 명령이 없습니다. Orca에서 직접 열어 주세요.', unsupported: true };
     }
 
     // 바로 이동한다. 평소에는 CLI 한 번이면 된다 (노브를 빨리 돌릴 때 반응, 2026-10-04).
