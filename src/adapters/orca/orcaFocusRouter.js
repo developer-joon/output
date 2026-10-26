@@ -1,6 +1,6 @@
 import { FocusRouter } from '../../core/focusRouter.js';
 import { OrcaCli, FOCUS_COMMAND } from './orcaCli.js';
-import { CHAT_CHILD_PREFIX } from './orcaAdapter.js';
+import { CHAT_CHILD_PREFIX, chatSessionIdOf } from './orcaAdapter.js';
 
 /**
  * Orca 포커스 — **이동만** 한다.
@@ -36,9 +36,16 @@ export class OrcaFocusRouter extends FocusRouter {
       };
     }
 
-    // 내장 채팅은 터미널이 아니다. CLI에 채팅으로 데려가는 명령이 없다 (Orca 1.4.227, 2026-10-22)
+    // 내장 채팅은 터미널이 아니다. CLI 명령이 없어 런타임 요청으로 작업을 열고 그 채팅을 띄운다 (실측 2026-10-27:
+    // reveal만으로는 다른 작업을 보고 있으면 화면이 그대로다). 실패하면 이유만 알린다
     if (target.childId.startsWith(CHAT_CHILD_PREFIX)) {
-      return { ok: false, reasonKo: 'Orca 채팅 세션으로 이동하는 명령이 없습니다. Orca에서 직접 열어 주세요.', unsupported: true };
+      try {
+        await this.cli.rpc('worktree.activate', { worktree: `id:${target.unitId}`, navigation: 'host' });
+        await this.cli.rpc('agentSession.reveal', { sessionId: chatSessionIdOf(target.childId) });
+        return { ok: true, handle: target.childId, recovered: false };
+      } catch (err) {
+        return { ok: false, reasonKo: `Orca 채팅으로 이동하지 못했습니다 (${err.message}). Orca에서 직접 열어 주세요.` };
+      }
     }
 
     // 바로 이동한다. 평소에는 CLI 한 번이면 된다 (노브를 빨리 돌릴 때 반응, 2026-10-04).

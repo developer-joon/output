@@ -121,6 +121,11 @@ const CHAT_PANE_PREFIX = 'structured-agent-session-';
 /** 채팅 child id 앞머리. 터미널 핸들이 아니므로 이동 경로가 이것으로 구분한다 */
 export const CHAT_CHILD_PREFIX = 'chat:';
 
+/** 채팅 child id → Orca 채팅 sessionId. paneKey `structured-agent-session-<sessionId>:<leaf>` (실측 2026-10-27) */
+export function chatSessionIdOf(childId) {
+  return childId.slice(CHAT_CHILD_PREFIX.length + CHAT_PANE_PREFIX.length).split(':')[0];
+}
+
 function isChatAgent(a) {
   return typeof a?.paneKey === 'string' && a.paneKey.startsWith(CHAT_PANE_PREFIX);
 }

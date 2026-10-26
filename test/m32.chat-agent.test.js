@@ -57,15 +57,29 @@ describe('M32 / 터미널 없는 Orca 채팅 에이전트', () => {
     assert.equal(r.units.find((x) => x.id === WT).children.length, 1);
   });
 
-  it('B05 채팅 칸을 눌러도 terminal switch를 부르지 않고 이유를 알린다', async () => {
+  it('B05 채팅 칸을 누르면 작업을 연 뒤 그 채팅을 띄운다 — terminal switch는 부르지 않는다 (2026-10-27)', async () => {
     const { cli: c, calls } = cli();
     const a = new OrcaAdapter({ cli: c });
     const r = await a.list();
     const child = r.units.find((x) => x.id === WT).children[0];
     calls.length = 0;
     const res = await new OrcaFocusRouter({ cli: c, adapter: a }).focus({ kind: 'child', unitId: WT, childId: child.id, reason: 'test' });
+    assert.equal(res.ok, true);
+    assert.deepEqual(calls, [
+      `rpc worktree.activate {"worktree":"id:${WT}","navigation":"host"}`,
+      'rpc agentSession.reveal {"sessionId":"claude_e228"}',
+    ]);
+  });
+
+  it('B06 Orca가 거절하면 엉뚱한 곳으로 가지 않고 이유를 알린다', async () => {
+    const c = new OrcaCli({ runner: async () => JSON.stringify({ ok: false, error: { code: 'method_not_found' } }) });
+    const res = await new OrcaFocusRouter({ cli: c }).focus({ kind: 'child', unitId: WT, childId: `chat:${PANE}`, reason: 'test' });
     assert.equal(res.ok, false);
     assert.match(res.reasonKo, /채팅/);
-    assert.deepEqual(calls, []);
+  });
+
+  it('B07 허용한 두 요청 말고는 rpc로도 보내지 않는다', async () => {
+    const c = new OrcaCli({ runner: async () => '{"ok":true,"result":{}}' });
+    await assert.rejects(c.rpc('agentSession.send', { sessionId: 'x' }), /허용되지 않은/);
   });
 });

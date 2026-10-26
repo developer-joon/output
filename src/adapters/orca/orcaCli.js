@@ -1,4 +1,6 @@
 import { execFile } from 'node:child_process';
+import { existsSync, realpathSync } from 'node:fs';
+import path from 'node:path';
 
 /**
  * Orca CLI 호출 — **읽기와 focus만**.
@@ -21,6 +23,19 @@ export const READ_COMMANDS = Object.freeze({
 
 /** 상태를 바꾸지만 파괴적이지 않은 유일한 명령. */
 export const FOCUS_COMMAND = Object.freeze(['terminal', 'switch']);
+
+/**
+ * CLI 명령이 없는 이동 — Orca 채팅 세션 (실측 Orca 1.4.241, 2026-10-27).
+ * 런타임 요청을 Orca CLI 자신의 클라이언트로 보낸다. 작업을 열고(activate) 그 채팅을 띄운다(reveal).
+ * 둘 다 terminal.focus와 같은 권한 등급이고 화면만 옮긴다. 이 밖의 요청은 보내지 않는다.
+ */
+export const RPC_FOCUS_METHODS = Object.freeze(['worktree.activate', 'agentSession.reveal']);
+
+// Orca 앱의 Electron을 노드 모드로 띄워 CLI 클라이언트로 요청 하나를 보낸다. 값은 환경 변수로 받는다 (셸 조립 없음)
+const RPC_SCRIPT = `const { RuntimeClient } = require(process.env.ORCA_RPC_CLIENT);
+new RuntimeClient().call(process.env.ORCA_RPC_METHOD, JSON.parse(process.env.ORCA_RPC_PARAMS), { timeoutMs: 8000 })
+  .then((r) => { process.stdout.write(JSON.stringify(r)); process.exit(0); },
+    (e) => { process.stdout.write(JSON.stringify({ ok: false, error: { code: e.code ?? null, message: String(e.message) } })); process.exit(0); });`;
 
 /** 어떤 경우에도 실행하지 않는다. */
 export const FORBIDDEN_VERBS = Object.freeze([
@@ -93,6 +108,53 @@ export class OrcaCli {
       );
     }
     return parsed.result ?? {};
+  }
+
+  /**
+   * @param {string} method RPC_FOCUS_METHODS 중 하나만
+   * @returns {Promise<object>} result 부분
+   */
+  async rpc(method, params) {
+    if (!RPC_FOCUS_METHODS.includes(method)) throw new OrcaCliError(`허용되지 않은 Orca 요청입니다: ${method}`);
+    const args = ['rpc', method, JSON.stringify(params)];
+    this.calls.push(args);
+    const stdout = this.runner ? await this.runner(this.bin, args) : await this._execRpc(method, params);
+    let parsed;
+    try {
+      parsed = JSON.parse(stdout);
+    } catch {
+      throw new OrcaCliError(`Orca 응답을 JSON으로 읽지 못했습니다: ${method}`);
+    }
+    if (parsed.ok === false) throw new OrcaCliError(`Orca가 요청을 거절했습니다: ${method}`, { code: parsed.error?.code ?? null });
+    return parsed.result ?? {};
+  }
+
+  /** bin(…/Orca.app/Contents/Resources/bin/orca, 셸 링크면 따라감)에서 Orca 앱 실행 파일과 CLI 클라이언트를 찾는다 */
+  _execRpc(method, params) {
+    const contents = path.resolve(path.dirname(realpathSync(this._binPath())), '..', '..');
+    return new Promise((resolve, reject) => {
+      execFile(path.join(contents, 'MacOS', 'Orca'), ['-e', RPC_SCRIPT], {
+        timeout: this.timeoutMs, maxBuffer: this.maxBuffer, encoding: 'utf8',
+        env: {
+          ...process.env, ELECTRON_RUN_AS_NODE: '1',
+          ORCA_RPC_CLIENT: path.join(contents, 'Resources', 'app.asar.unpacked', 'out', 'cli', 'runtime', 'client.js'),
+          ORCA_RPC_METHOD: method, ORCA_RPC_PARAMS: JSON.stringify(params),
+        },
+      }, (err, stdout) => {
+        if (err) { reject(new OrcaCliError(`Orca 요청 실패 (${method}): ${err.message.split('\n')[0]}`, { code: err.code })); return; }
+        resolve(stdout);
+      });
+    });
+  }
+
+  /** 'orca'처럼 이름만 주면 PATH에서 찾는다 */
+  _binPath() {
+    if (this.bin.includes('/')) return this.bin;
+    for (const dir of (process.env.PATH ?? '').split(':')) {
+      const p = path.join(dir, this.bin);
+      if (existsSync(p)) return p;
+    }
+    throw new OrcaCliError(`orca 실행 파일을 찾지 못했습니다: ${this.bin}`);
   }
 
   _exec(args) {
