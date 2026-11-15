@@ -93,6 +93,24 @@ export async function smoke(c) {
   shift.partsAfterAdd = await c.settings.webContents.executeJavaScript(`[...document.querySelectorAll('#main .panel > *, .ly-main > *')].map((e) => (e.className || e.tagName) + ':' + Math.round(e.getBoundingClientRect().height))`);
   shift.partsBefore = set.layersFit?.parts;
   shift.headKids = await c.settings.webContents.executeJavaScript(`[...document.querySelectorAll('.ly-head3 .ly-row > *, .ly-apps > *')].map((e) => (e.className || e.tagName) + ':' + Math.round(e.getBoundingClientRect().width) + 'x' + Math.round(e.getBoundingClientRect().height) + '@' + Math.round(e.getBoundingClientRect().top))`);
+  // 목록 스크롤 (2026-11-15 사용자: 뒤 레이어를 고르면 처음부터 다시 스크롤되어 어지럽다) — 넘치게 늘린 뒤 끝 쪽 칩을 눌러도 스크롤이 0으로 돌아가지 않고 고른 칩이 다 보이는지
+  for (let i = 0; i < 8; i += 1) {
+    await c.settings.webContents.executeJavaScript(`[...document.querySelectorAll('button')].find((b) => b.textContent === '+ 레이어')?.click()`);
+    await wait(150);
+  }
+  shift.listScroll = await c.settings.webContents.executeJavaScript(`(async () => {
+    const list = () => document.querySelector('.ly-list');
+    const seen = () => { const l = list(), b = l.querySelector('[aria-pressed="true"]'), r = l.getBoundingClientRect(), s = b.getBoundingClientRect(), c = l.querySelector('.ly-count').getBoundingClientRect(); return s.left >= c.right && s.right <= r.right; };
+    list().scrollLeft = list().scrollWidth;
+    const before = list().scrollLeft;
+    [...list().querySelectorAll('button[aria-pressed]')].at(-3).click();
+    await new Promise((r) => setTimeout(r, 300));
+    const afterBack = list().scrollLeft;
+    const backSeen = seen();
+    list().querySelector('button[aria-pressed]').click();
+    await new Promise((r) => setTimeout(r, 300));
+    return { overflow: list().scrollWidth > list().clientWidth, before, afterBack, backSeen, afterFirst: list().scrollLeft, firstSeen: seen() };
+  })()`);
   await c.settings.webContents.executeJavaScript(`[...document.querySelectorAll('button')].find((b) => b.textContent === '되돌리기')?.click()`);
   await wait(400);
   shift.afterRevert = await workTop();
@@ -228,8 +246,8 @@ export async function smoke(c) {
     await wait(400);
     await snap(c.settings, 'layers-orca');
     // 추천 프리셋 레이어(있으면): 잠긴 키도 LED 색 테두리 (2026-10-10)
-    if (await js(`Boolean([...document.querySelectorAll('.ly-list button')].find((b) => b.textContent.includes('코드 편집기')))`)) {
-      await js(`[...document.querySelectorAll('.ly-list button')].find((b) => b.textContent.includes('코드 편집기'))?.click()`);
+    if (await js(`Boolean([...document.querySelectorAll('.ly-list button')].find((b) => b.title.includes('코드 편집기')))`)) {
+      await js(`[...document.querySelectorAll('.ly-list button')].find((b) => b.title.includes('코드 편집기'))?.click()`);
       await wait(400);
       await snap(c.settings, 'layers-code');
       await js(`[...document.querySelectorAll('.ly-list button')].find((b) => b.textContent.includes('Orca'))?.click()`);

@@ -577,19 +577,18 @@ export async function renderLayers() {
   const layer = lyLayer();
   const shown = layer.preset ? lyPresetView(layer) : layer;
 
+  // 칩은 색·이름만, 프리셋·앱 수는 마우스를 올리면 (2026-11-15 사용자: 많으면 찾기 어렵고 몇 개인지 안 보인다)
   const list = h('div', { class: 'layers ly-list' },
-    ...ly.data.map((l) => h('button', { 'aria-pressed': String(ly.sel === l.id), onclick: () => { ly.sel = l.id; ly.slot = null; renderLayers(); } },
-      h('span', { class: 'ly-dot', style: { background: l.color } }), ` ${l.name || '(이름 없음)'}`,
-      l.preset ? h('span', { class: 'small muted' }, ` · 프리셋 ${lyPresets.list.find((p) => p.id === l.preset)?.name ?? l.preset}`) : null,
-      l.kind === 'user' ? h('span', { class: 'small muted' }, ` · 앱 ${l.apps.length}`) : null)),
+    h('span', { class: 'small muted ly-count' }, `레이어 ${ly.data.length}`),
+    ...ly.data.map((l) => h('button', { 'aria-pressed': String(ly.sel === l.id), onclick: () => { ly.sel = l.id; ly.slot = null; renderLayers(); },
+      title: [l.preset ? `프리셋 ${lyPresets.list.find((p) => p.id === l.preset)?.name ?? l.preset}` : null, l.kind === 'user' ? `앱 ${l.apps.length}` : null].filter(Boolean).join(' · ') || undefined },
+      h('span', { class: 'ly-dot', style: { background: l.color } }), ` ${l.name || '(이름 없음)'}`)),
     h('button', { class: 'btn', onclick: () => {
       const id = `l-new-${Date.now()}`;
       // 다른 레이어와 겹치지 않는 색 (2026-10-10)
       ly.data.push({ id, kind: 'user', name: '새 레이어', color: pickKeyColor(ly.data.map((l) => l.color)), preset: null, apps: [], keys: {}, dial: {}, joystick: { directions: 4, axis: 'vertical', short: {} } });
       ly.sel = id; ly.slot = null; renderLayers();
     } }, '+ 레이어'));
-  // 고른 레이어가 보이게 옆으로 스크롤 (세로는 움직이지 않는다)
-  setTimeout(() => { const b = document.querySelector('.ly-list [aria-pressed="true"]'); b?.parentElement?.scrollTo?.({ left: Math.max(0, b.offsetLeft - 40), behavior: 'smooth' }); });
 
   const page = panel('레이어', [
     '위에서 레이어를 고르거나 + 레이어로 만듭니다.',
@@ -632,5 +631,15 @@ export async function renderLayers() {
   // 동작 줄은 제목 줄 오른쪽에 (2026-10-10: 위쪽 높이를 늘리지 않게)
   const actions = page.querySelector('.ly-actions');
   page.querySelector('.panel-head')?.append(actions);
+  // 다시 그려도 목록 스크롤은 그 자리 그대로, 고른 칩이 잘려 있을 때만 보일 만큼 옮긴다
+  // (2026-11-15 사용자: 뒤 레이어를 고르면 처음부터 다시 스크롤되어 어지럽다)
+  const prevLeft = main.querySelector('.ly-list')?.scrollLeft ?? 0;
   mount(main, page);
+  const sel = list.querySelector('[aria-pressed="true"]');
+  list.scrollLeft = prevLeft;
+  if (sel) {
+    const pad = list.querySelector('.ly-count').offsetWidth + 12;   // 왼쪽에 붙은 개수에 가리지 않게
+    if (sel.offsetLeft - pad < list.scrollLeft) list.scrollLeft = sel.offsetLeft - pad;
+    else if (sel.offsetLeft + sel.offsetWidth + 12 > list.scrollLeft + list.clientWidth) list.scrollLeft = sel.offsetLeft + sel.offsetWidth + 12 - list.clientWidth;
+  }
 }
