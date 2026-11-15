@@ -35,7 +35,8 @@ export const SETTINGS_URLS = Object.freeze({
 });
 
 export function parseBundleId(text) {
-  return /"CFBundleIdentifier"="([^"]+)"/.exec(text ?? '')?.[1] ?? null;
+  // macOS 27부터 lsappinfo가 "CFBundleIdentifier"="…" 대신 bundleID="…"로 쓴다
+  return /(?:"CFBundleIdentifier"|bundleID)="([^"]+)"/.exec(text ?? '')?.[1] ?? null;
 }
 
 export async function frontmostBundleId() {

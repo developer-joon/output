@@ -542,6 +542,10 @@ describe('M5-4 / macOS 연결부', () => {
     assert.equal(parseBundleId(''), null);
   });
 
+  it('M01b macOS 27 lsappinfo 출력(bundleID="…")에서도 읽는다', () => {
+    assert.equal(parseBundleId('[ NULL ]  ASN:0x0-0x3a03a: (in front) \n    bundleID="com.stablyai.orca"\n    bundle path=[ NULL ] \n'), 'com.stablyai.orca');
+  });
+
   it('M02 글자 키는 keystroke, 이름 키는 key code로 만든다', () => {
     assert.equal(
       keystrokeScript({ key: 'p', modifiers: ['command', 'shift'] }),

@@ -77,7 +77,7 @@ async function setupSection() {
       step(5, orca.ok ? true : false, 'Orca',
         orca.ok ? 'Orca 연결됨. 에이전트 상태를 2초마다 읽습니다. 읽기와 터미널 전환만 합니다.'
           : 'Orca에 닿지 못했습니다. Orca를 열면 자동으로 다시 읽습니다. 그동안 슬롯은 비어 있습니다 — 모의 데이터를 넣지 않습니다.'),
-      step(6, null, '로그인할 때 자동 시작',
+      step(6, auto.openAtLogin ? true : null, '로그인할 때 자동 시작',
         auto.openAtLogin ? '켜져 있습니다.' : '꺼져 있습니다 (기본). 켜기 전에는 등록하지 않습니다.',
         h('button', { class: 'btn', onclick: async () => { await cb.invoke('cb:autostart:set', !auto.openAtLogin); rerender(); } }, auto.openAtLogin ? '끄기' : '켜기')),
       step(7, s.accessibility ? true : null, '손쉬운 사용 (선택)',
